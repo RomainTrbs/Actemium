@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+    {% block head %}
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+        <style>
+            /* Style pour un meilleur espacement des cellules */
+            th, td {
+                text-align: center;
+                vertical-align: middle !important;
+            }
+        </style>
+        {% block title %} Planning {% endblock %}
+    {% endblock %}
+
+    {% block body %}
+
+    <div class="container mt-5">
+        <h2>Tableau des Affaires</h2>
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Fini</th>
+                    <th>Numéro d'Affaire</th>
+                    <th>Collaborateur</th>
+                    <th>Client</th>
+                    <th>Désignation</th>
+                    <th>Nbre Heure</th>
+                    <th>Date de Début ou Mise à Jour</th>
+                    <th>Heure Passé</th>
+                    <th>Date Fin Impératif</th>
+                    <th>Dernière Case Vide</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for affaire in affaires %}
+                    <tr>
+                        <td>
+                        <form method="post" action="{{ path('update_fini', {'id': affaire.id}) }}">
+                            <input type="hidden" name="form[fini]" value="1">
+                            <button type="submit">Marquer comme fini</button>
+                        </form>
+                         </td>
+                        <td>{{ affaire.NumAffaire }}</td>
+                        <td>{{ affaire.Client }}</td>
+                        <td>{{ affaire.Collaborateur }}</td>
+                        <td>{{ affaire.Designation }}</td>
+                        <td>{{ affaire.NbreHeure }}</td>
+                        <td>{{ affaire.getDateDebut()|date('d-m-Y') }}</td>
+                        <td>{{ affaire.HeurePasse }}</td>
+                        <td>
+                            {% if affaire.DateFin is not null %}
+                                {{ affaire.getDate()|date('Y-m-d') }}
+                            {% endif %}
+                        </td>
+                        <td></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% endblock %}
+
