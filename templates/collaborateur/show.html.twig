@@ -1,0 +1,132 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion du Collaborateur{% endblock %}
+
+{% block body %}
+    <div class='text-center'>	
+        <div class='h2 mb-3 font-weight-bold'>Gestion du Collaborateur</div>
+        <a class="grey-btn f-20 px-4 py-2" href="{{ path('edit_collaborateur', {'id': collaborateur.id}) }}">Modifier</a>
+        {{ include('collaborateur/_delete_form.html.twig') }}
+    </div>
+    <hr>
+
+    <div class="container show-container">
+        <div class="row justify-content-around">
+            <div class="container-background col-md-auto mb-auto mr-5 p-4">
+                <div class='f-20 text-center font-weight-bold'>Le Collaborateur</div>
+                <hr>
+                <div class='row mb-2'>
+                    <div class='col-md-auto my-auto'><i class="fas fa-user"></i></div>
+                    <div class='col'>{{ collaborateur.nom }} {{ collaborateur.prenom }}</div>
+                </div>
+                <hr>
+                <div class='row mb-2'>
+                    <div class='col-md-auto my-auto'><i class="fas fa-phone"></i></div>
+                    <div class='col'>{{ collaborateur.HrJour }}</div>
+                </div>
+                <hr>
+                <div class='row mb-2'>
+                    <div class='col-md-auto my-auto'><i class="fas fa-at"></i></div>
+                    <div class='col'>{{ collaborateur.HrSemaine }}</div>
+                </div>
+                <div class='row mb-2'>
+                    <div class='col-md-auto my-auto'><i class="fas fa-at"></i></div>
+                    <div class='col'>{{ collaborateur.JourSemaine }}</div>
+                </div>
+                <div class='row mb-2'>
+                    <div class='col-md-auto my-auto'><i class="fas fa-at"></i></div>
+                    <div class='col'>{{ collaborateur.representant }}</div>
+                </div>
+                <div class='row mb-2'>
+                    <div class='col-md-auto my-auto'><i class="fas fa-at"></i></div>
+                    <div class='col'>{{ collaborateur.service }}</div>
+                </div>
+                <hr>
+            </div>
+
+
+
+
+
+
+
+{#---------------------------------------------------------------Partie du Tableau De Dates------------------------------------------------------------------------------#}
+
+{% set joursSemaines = {
+    'Monday': 'Lun',
+    'Tuesday': 'Mar',
+    'Wednesday': 'Mer',
+    'Thursday': 'Jeu',
+    'Friday': 'Ven',
+    'Saturday': 'Sam',
+    'Sunday': 'Dim'
+} %}
+
+<div class="col-12 table-responsive" style="vertical-align: top;">
+<table class="table table-bordered table-sm">
+<thead class="thead-dark">
+    {% for date in tableauDates %}
+        <th class="small-cell" style="height: 128px">
+            <table class="table table-bordered  table-sm  table-sm">
+                <tr class="small-cell"><td class="small-cell" style="color:#ffffff; font-size:9px; height: 10px;">{{ date.annee }}</td></tr>
+                <tr class="small-cell"><td class="small-cell" style="color:#ffffff; font-size:9px; height: 10px;">{{ joursSemaines[date.jourSemaine] }}</td></tr>
+                <tr class="small-cell"><td class="small-cell" style="color:#ffffff; font-size:9px; height: 10px;">{{ date.dateFormatee }}</td></tr>
+                <tr class="small-cell"><td class="small-cell" style="color:#ffffff; font-size:9px; height: 10px;">{{ date.numeroSemaine }}</td></tr>
+            </table>
+        </th>  
+    {% endfor %}
+    </thead>
+    <tbody>
+    {% for affaire in affaires %}
+        {% set FinAffaires = affaire.getDateDebut|date_modify('-1 day') %}
+            {% set nombreJours = (affaire.NbreHeure) / (affaire.Collaborateur.HrSemaine / affaire.Collaborateur.JourSemaine) %}
+            {% set nombreJours = nombreJours|round(0, 'ceil') %}
+            {% set FinAffaires = FinAffaires|date_modify('+' ~ nombreJours ~ ' days') %}
+    <tr>
+        {% for date in tableauDates %}
+            {% if date.jourSemaine in weekend or date.dateFormatee in ferie %}
+            
+                {% if joursSemaines[date.jourSemaine] == "Sam" %}
+                    <td class="small-cell" style="height: 10px; font-size:9px;">Sam</td>
+                    {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
+                       {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
+                    {% endif %}
+
+                {% elseif joursSemaines[date.jourSemaine] == "Dim" %}
+                    <td class="small-cell" style="height: 10px; font-size:9px;">Dim</td>
+                    {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
+                        {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
+                    {% endif %}
+
+                {% else %}
+                    <td class="small-cell" style="height: 10px; font-size:9px;">F</td>
+                    {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
+                        {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
+                    {% endif %}
+                {% endif %}  
+
+            {% elseif affaire.getDateFin is not null %} 
+                {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and affaire.getDateFin()|date('m/d') >= date.dateFormatee %}
+                    <td class="small-cell" style="height: 42px; background-color: #00ffff;"></td>
+                {% else %}
+                    <td class="small-cell" style="height: 42px;"></td>
+                {% endif %}
+
+            {% elseif affaire.getDateFin is null %}
+                {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
+                    <td class="small-cell" style="height: 42px; background-color: #00ffff;"></td>
+                {% else %}
+                    <td class="small-cell" style="height: 42px;"></td>
+                {% endif %}
+
+            {% endif %}
+        {% endfor %}
+        </tr>        
+    {% endfor %}
+
+    </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+{% endblock %}

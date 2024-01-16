@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau Collaborateur{% endblock %}
+
+{% block body %}
+    <a href="{{ path('collaborateur_index') }}"><i class="fas fa-chevron-left h1 float-left"></i></a>
+    <h2 class='text-center mb-5 font-weight-bold'>Nouveau Collaborateur</h2>
+
+    {{ include('collaborateur/_form.html.twig') }}
+{% endblock %}

@@ -2,9 +2,10 @@
 
 namespace App\Entity;
 
-use App\Repository\AffaireRepository;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\AffaireRepository;
 
 #[ORM\Entity(repositoryClass: AffaireRepository::class)]
 #[ORM\Table(name: "affaires")]
@@ -19,19 +20,19 @@ class Affaire
     private ?int $fini = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $num_affaire = null;
+    private ?string $num_affaire = null;
 
     #[ORM\Column(length: 255)]
     private ?string $client = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $collaborateur = null;
+    #[ORM\ManyToOne(targetEntity: Collaborateur::class, inversedBy: 'affaires')]
+    private Collaborateur $collaborateur ;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $designation = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $nbre_heure = null;
+    private ?float $nbre_heure = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $date_debut = null;
@@ -41,6 +42,12 @@ class Affaire
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $date_fin = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $nbre_jour_fractionnement = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $pourcent_reserve = null;
 
     public function getId(): ?int
     {
@@ -59,12 +66,12 @@ class Affaire
         return $this;
     }
 
-    public function getNumAffaire(): ?int
+    public function getNumAffaire(): ?string
     {
         return $this->num_affaire;
     }
 
-    public function setNumAffaire(?int $num_affaire): static
+    public function setNumAffaire(?string $num_affaire): static
     {
         $this->num_affaire = $num_affaire;
 
@@ -83,12 +90,12 @@ class Affaire
         return $this;
     }
 
-    public function getCollaborateur(): ?string
+    public function getCollaborateur(): ?Collaborateur
     {
         return $this->collaborateur;
     }
 
-    public function setCollaborateur(string $collaborateur): static
+    public function setCollaborateur(?Collaborateur $collaborateur): self
     {
         $this->collaborateur = $collaborateur;
 
@@ -107,12 +114,12 @@ class Affaire
         return $this;
     }
 
-    public function getNbreHeure(): ?int
+    public function getNbreHeure(): ?float
     {
         return $this->nbre_heure;
     }
 
-    public function setNbreHeure(?int $nbre_heure): static
+    public function setNbreHeure(?float $nbre_heure): static
     {
         $this->nbre_heure = $nbre_heure;
 
@@ -143,7 +150,7 @@ class Affaire
         return $this;
     }
 
-    public function getDateFin(): ?\DateTimeInterface
+    public function getDateFin(): ?DateTimeInterface
     {
         return $this->date_fin;
     }
@@ -151,6 +158,30 @@ class Affaire
     public function setDateFin(?\DateTimeInterface $date_fin): static
     {
         $this->date_fin = $date_fin;
+
+        return $this;
+    }
+
+    public function getNbreJourFractionnement(): ?int
+    {
+        return $this->nbre_jour_fractionnement;
+    }
+
+    public function setNbreJourFractionnement(?int $nbre_jour_fractionnement): static
+    {
+        $this->nbre_jour_fractionnement = $nbre_jour_fractionnement;
+
+        return $this;
+    }
+
+    public function getPourcentReserve(): ?int
+    {
+        return $this->pourcent_reserve;
+    }
+
+    public function setPourcentReserve(?int $pourcent_reserve): static
+    {
+        $this->pourcent_reserve = $pourcent_reserve;
 
         return $this;
     }

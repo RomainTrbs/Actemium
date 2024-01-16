@@ -1,0 +1,71 @@
+{{ form_start(form) }}
+<style>
+    .custom-border {
+       border: 2px solid #1d5294;
+        padding: 2px;
+        border-color: #bed73e #1d5294 #1d5294 #bed73e;
+    }
+</style>
+
+    <div class="p-4 form container-background">
+        <div class="container custom-border">
+            <div class="row justify-content-md-center">
+                <div class='col-8'>
+                    <div class='col row'>
+                        <h5>Prenom</h5>
+                        {{ form_errors(form.prenom) }}
+                        {{ form_widget(form.prenom, {'attr': {'class': 'mb-3'}}) }}
+                    </div>
+
+                    <div class='col row'>
+                        <div class='col row'>
+                            <h5>Nom</h5>    
+                            {{ form_errors(form.nom) }}
+                            {{ form_widget(form.nom, {'attr': {'class': 'mb-3 mr-3'}}) }}
+                        </div>
+                        <div class='col-md-auto row'>
+                            <h5>Nombre d'Heure par jour</h5>    
+                            {{ form_errors(form.hr_jour) }}
+                            {{ form_widget(form.hr_jour, {'attr': {'class': 'mb-3'}}) }}
+                        </div>
+                    </div>
+
+                    <div class='col row'>
+                        <h5>Nombre d'Heure par Semaine</h5>            
+                        {{ form_errors(form.hr_semaine) }}
+                        {{ form_widget(form.hr_semaine, {'attr': {'class': 'mb-3'}}) }}
+                    </div>
+                </div>
+
+                <div class='col-4'>
+                    <div class='col row'>
+                        <h5>Nombre de Jours Travaillés par Semaine</h5>            
+                        {{ form_errors(form.jour_semaine) }}
+                        {{ form_widget(form.jour_semaine, {'attr': {'class': 'mb-3', 'required': 'required'}}) }}
+                    </div>
+
+                    <div class='col row'>
+                        <h5>Représentant</h5>            
+                        {{ form_errors(form.representant) }}
+                        {{ form_widget(form.representant, {'attr': {'class': 'mb-3'}}) }}
+                    </div>
+                </div>
+
+                <div class='col-12'>
+                    <div class='col row'>
+                        <h5>Service</h5>
+                        {{ form_errors(form.service) }}
+                        {{ form_widget(form.service, {'attr': {'class': 'mb-3', 'rows': '5'}}) }}
+                    </div>
+                </div>
+
+                
+                    
+
+                <button class=" green-btn py-2 px-4 mt-3">{{ button_label|default('Valider') }}</button>
+
+            </div>
+        </div>
+    </div>
+
+{{ form_end(form) }}
