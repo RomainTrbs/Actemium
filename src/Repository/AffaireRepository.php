@@ -20,4 +20,15 @@ class AffaireRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Affaire::class);
     }
+
+    public function findAllByCollaborateur($id)
+    {
+        return $this->createQueryBuilder('i')
+            ->andWhere('i.collaborateur = :id')
+            ->setParameter('id', $id)
+            ->orderBy('i.id', 'DESC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }

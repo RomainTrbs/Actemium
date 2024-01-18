@@ -2,8 +2,9 @@
 
 namespace App\Entity;
 
-use App\Repository\CollaborateurRepository;
+use App\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\CollaborateurRepository;
 
 #[ORM\Entity(repositoryClass: CollaborateurRepository::class)]
 class Collaborateur
@@ -28,11 +29,11 @@ class Collaborateur
     #[ORM\Column(nullable: true)]
     private ?int $jour_semaine = null;
 
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $representant = null;
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'collaborateur')]
+    private User $representant ;
 
     #[ORM\Column(length: 50, nullable: true)]
-    private ?string $service = null;
+    private ?string $poste = null;
 
     public function getId(): ?int
     {
@@ -99,26 +100,26 @@ class Collaborateur
         return $this;
     }
 
-    public function getRepresentant(): ?string
+    public function getRepresentant(): ?User
     {
         return $this->representant;
     }
 
-    public function setRepresentant(?string $representant): static
+    public function setRepresentant(?User $representant): static
     {
         $this->representant = $representant;
 
         return $this;
     }
 
-    public function getService(): ?string
+    public function getPoste(): ?string
     {
-        return $this->service;
+        return $this->poste;
     }
 
-    public function setService(?string $service): static
+    public function setPoste(?string $poste): static
     {
-        $this->service = $service;
+        $this->poste = $poste;
 
         return $this;
     }

@@ -34,7 +34,7 @@
 <h2 align="center">Tableau des Affaires</h2>
 <hr>
 <div class="row">
-<div class="col-6 table-responsive" style="vertical-align: top;">
+<div class="col-5 table-responsive" style="vertical-align: top;">
     
     <table id="sortableTable" class="table table-bordered table-sm">
         <thead class="thead-dark" style="height: 30px;" >
@@ -80,7 +80,7 @@
 {#------------------------Tableau de dates--------------------------------------------------------------------#}
 
 
-<div class="col-6 table-responsive" style="vertical-align: top;">
+<div class="col-7 table-responsive" style="vertical-align: top;">
 <table class="table table-bordered table-sm">
 <thead class="thead-dark">
     {% for date in tableauDates %}
@@ -96,6 +96,7 @@
     </thead>
     <tbody>
     {% for affaire in affaires %}
+    {% set fractionnement = 0 %}
         {% set FinAffaires = affaire.getDateDebut|date_modify('-1 day') %}
             {% set nombreJours = (affaire.NbreHeure) / (affaire.Collaborateur.HrSemaine / affaire.Collaborateur.JourSemaine) %}
             {% set nombreJours = nombreJours|round(0, 'ceil') %}
@@ -126,6 +127,9 @@
             {% elseif affaire.getDateFin is not null %} 
                 {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and affaire.getDateFin()|date('m/d') >= date.dateFormatee %}
                     <td class="small-cell" style="height: 42px; background-color: #00ffff;"></td>
+                {% elseif FinAffaires|date('m/d') < date.dateFormatee and affaire.NbreJourFractionnement > fractionnement  %}
+                {% set fractionnement = fractionnement + 1 %}
+                    <td class="small-cell" style="height: 42px; background-color: #c0c0c0;"></td>
                 {% else %}
                     <td class="small-cell" style="height: 42px;"></td>
                 {% endif %}
@@ -133,6 +137,9 @@
             {% elseif affaire.getDateFin is null %}
                 {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
                     <td class="small-cell" style="height: 42px; background-color: #00ffff;"></td>
+                {% elseif FinAffaires|date('m/d') < date.dateFormatee and affaire.NbreJourFractionnement > fractionnement  %}
+                {% set fractionnement = fractionnement + 1 %}
+                    <td class="small-cell" style="height: 42px; background-color: #c0c0c0;"></td>
                 {% else %}
                     <td class="small-cell" style="height: 42px;"></td>
                 {% endif %}

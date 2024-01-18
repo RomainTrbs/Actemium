@@ -1,58 +1,74 @@
 {% extends 'base.html.twig' %}
 
+{% block head %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        /* Style pour un meilleur espacement des cellules */
+        th,
+        td {
+            text-align: center;
+            vertical-align: middle !important;
+            font-size: 0.8rem; /* Taille de police plus petite */
+        }
+
+        .small-cell {
+            max-width: 11px; /* Largeur maximale pour les cellules */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+{% endblock %}
+
 {% block title %}Gestion du Collaborateur{% endblock %}
 
 {% block body %}
-    <div class='text-center'>	
-        <div class='h2 mb-3 font-weight-bold'>Gestion du Collaborateur</div>
-        <a class="grey-btn f-20 px-4 py-2" href="{{ path('edit_collaborateur', {'id': collaborateur.id}) }}">Modifier</a>
+<div class="starter-template mb-5 mt-5 col-12 pr-5 pl-5">
+    <div class="text-center">	
+        <h2 align="center">Gestion du Collaborateur</h2>
+        <a class="btn btn-secondary f-20 px-4 py-2" href="{{ path('edit_collaborateur', {'id': collaborateur.id}) }}">Modifier</a>
         {{ include('collaborateur/_delete_form.html.twig') }}
     </div>
     <hr>
 
     <div class="container show-container">
-        <div class="row justify-content-around">
-            <div class="container-background col-md-auto mb-auto mr-5 p-4">
-                <div class='f-20 text-center font-weight-bold'>Le Collaborateur</div>
+        <div class="row d-flex justify-content-center">
+            <div class="container-background justify-content-center col-md-auto mb-auto">
+                <div class="h5 text-center font-weight-bold">Le Collaborateur</div>
                 <hr>
-                <div class='row mb-2'>
-                    <div class='col-md-auto my-auto'><i class="fas fa-user"></i></div>
-                    <div class='col'>{{ collaborateur.nom }} {{ collaborateur.prenom }}</div>
-                </div>
-                <hr>
-                <div class='row mb-2'>
-                    <div class='col-md-auto my-auto'><i class="fas fa-phone"></i></div>
-                    <div class='col'>{{ collaborateur.HrJour }}</div>
+                <div class="row mb-2">
+                    <div class="col-md-auto my-auto" align="left"><i class="fas fa-user"></i></div>
+                    <div class="col" align="right">{{ collaborateur.nom }} {{ collaborateur.prenom }}</div>
                 </div>
                 <hr>
-                <div class='row mb-2'>
-                    <div class='col-md-auto my-auto'><i class="fas fa-at"></i></div>
-                    <div class='col'>{{ collaborateur.HrSemaine }}</div>
+                <div class="row mb-2">
+                    <div class="col-md-auto my-auto" align="left"><span style="font-weight: bold;">Heures/Jour</span></div>
+                    <div class="col" align="right">{{ collaborateur.HrJour }}</div>
                 </div>
-                <div class='row mb-2'>
-                    <div class='col-md-auto my-auto'><i class="fas fa-at"></i></div>
-                    <div class='col'>{{ collaborateur.JourSemaine }}</div>
+                
+                <div class="row mb-2">
+                    <div class="col-md-auto my-auto" align="left"><span style="font-weight: bold;">Heures/Semaine</span></div>
+                    <div class="col" align="right">{{ collaborateur.HrSemaine }}</div>
                 </div>
-                <div class='row mb-2'>
-                    <div class='col-md-auto my-auto'><i class="fas fa-at"></i></div>
-                    <div class='col'>{{ collaborateur.representant }}</div>
+                <div class="row mb-2">
+                    <div class="col-md-auto my-auto" align="left"><span style="font-weight: bold;">Jours/Semaine</span></div>
+                    <div class="col" align="right">{{ collaborateur.JourSemaine }}</div>
                 </div>
-                <div class='row mb-2'>
-                    <div class='col-md-auto my-auto'><i class="fas fa-at"></i></div>
-                    <div class='col'>{{ collaborateur.service }}</div>
+                <hr>
+                <div class="row mb-2">
+                    <div class="col-md-auto my-auto" align="left"><span style="font-weight: bold;">Nom du Representant</span></div>
+                    <div class="col" align="right">{{ collaborateur.Representant.nom }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-auto my-auto" align="left"><span style="font-weight: bold;">Poste</span></div>
+                    <div class="col" align="right">{{ collaborateur.poste }}</div>
                 </div>
                 <hr>
             </div>
+        </div>
+    </div>
 
-
-
-
-
-
-
-{#---------------------------------------------------------------Partie du Tableau De Dates------------------------------------------------------------------------------#}
-
-{% set joursSemaines = {
+            {# Partie du Tableau De Dates #}
+            {% set joursSemaines = {
     'Monday': 'Lun',
     'Tuesday': 'Mar',
     'Wednesday': 'Mer',
@@ -61,72 +77,119 @@
     'Saturday': 'Sam',
     'Sunday': 'Dim'
 } %}
+        {% if affaires|length != 0 %}
+            <div class="row">
+                <div class="col-5 table-responsive" style="vertical-align: top;">
+                    <table id="sortableTable" class="table table-bordered table-sm">
+                        <thead class="thead-dark" style="height: 30px;">
+                            <tr>
+                                <th class="small-cell" style="height: 128px; font-size: 10px; width: 2px">Numéro d'Affaire</th>
+                                <th class="small-cell" style="height: 128px; font-size: 10px; width: 28px">Collaborateur</th>
+                                <th class="small-cell" style="height: 128px; font-size: 10px; width: 28px">Client</th>
+                                <th class="small-cell" style="height: 128px; font-size: 10px;">Désignation</th>
+                                <th class="small-cell" style="height: 128px; font-size: 10px; width: 20px;">Nbre Heure</th>
+                                <th class="small-cell" style="height: 128px; font-size: 10px; width: 23px">Date de Début ou Mise à Jour</th>
+                                <th class="small-cell" style="height: 128px; font-size: 10px; width: 15px;">Heure Passé</th>
+                                <th class="small-cell" style="height: 128px; font-size: 10px; width: 23px">Date Fin Impératif</th>
+                                <th class="small-cell" style="height: 128px; font-size: 10px; width: 23px">Nombre de jour de fractionnement</th>
+                                <th class="small-cell" style="height: 128px; font-size: 10px; width: 23px">%Temps Réserve</th>
+                            </tr>
+                        </thead>
+                        <tbody style="height: 42px;">
+                            {% for affaire in affaires %}
+                                <tr>
+                                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.NumAffaire }}</td>
+                                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.Collaborateur.nom }} {{ affaire.Collaborateur.prenom }}</td>
+                                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.Client }}</td>
+                                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.Designation }}</td>
+                                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.NbreHeure }}</td>
+                                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.getDateDebut()|date('d/m/Y') }}</td>
+                                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.HeurePasse }}</td>
+                                    <td class="small-cell" style="font-size: 10px; height: 42px;">
+                                        {% if affaire.DateFin is not null %}
+                                            {{ affaire.getDateFin()|date('Y-m-d') }}
+                                        {% endif %}
+                                    </td>
+                                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.NbreJourFractionnement }}</td>
+                                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.PourcentReserve }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
 
-<div class="col-12 table-responsive" style="vertical-align: top;">
-<table class="table table-bordered table-sm">
-<thead class="thead-dark">
-    {% for date in tableauDates %}
-        <th class="small-cell" style="height: 128px">
-            <table class="table table-bordered  table-sm  table-sm">
-                <tr class="small-cell"><td class="small-cell" style="color:#ffffff; font-size:9px; height: 10px;">{{ date.annee }}</td></tr>
-                <tr class="small-cell"><td class="small-cell" style="color:#ffffff; font-size:9px; height: 10px;">{{ joursSemaines[date.jourSemaine] }}</td></tr>
-                <tr class="small-cell"><td class="small-cell" style="color:#ffffff; font-size:9px; height: 10px;">{{ date.dateFormatee }}</td></tr>
-                <tr class="small-cell"><td class="small-cell" style="color:#ffffff; font-size:9px; height: 10px;">{{ date.numeroSemaine }}</td></tr>
-            </table>
-        </th>  
-    {% endfor %}
-    </thead>
-    <tbody>
-    {% for affaire in affaires %}
-        {% set FinAffaires = affaire.getDateDebut|date_modify('-1 day') %}
-            {% set nombreJours = (affaire.NbreHeure) / (affaire.Collaborateur.HrSemaine / affaire.Collaborateur.JourSemaine) %}
-            {% set nombreJours = nombreJours|round(0, 'ceil') %}
-            {% set FinAffaires = FinAffaires|date_modify('+' ~ nombreJours ~ ' days') %}
-    <tr>
-        {% for date in tableauDates %}
-            {% if date.jourSemaine in weekend or date.dateFormatee in ferie %}
-            
-                {% if joursSemaines[date.jourSemaine] == "Sam" %}
-                    <td class="small-cell" style="height: 10px; font-size:9px;">Sam</td>
-                    {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
-                       {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
-                    {% endif %}
+                {# Tableau de dates #}
 
-                {% elseif joursSemaines[date.jourSemaine] == "Dim" %}
-                    <td class="small-cell" style="height: 10px; font-size:9px;">Dim</td>
-                    {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
-                        {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
-                    {% endif %}
-
-                {% else %}
-                    <td class="small-cell" style="height: 10px; font-size:9px;">F</td>
-                    {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
-                        {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
-                    {% endif %}
-                {% endif %}  
-
-            {% elseif affaire.getDateFin is not null %} 
-                {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and affaire.getDateFin()|date('m/d') >= date.dateFormatee %}
-                    <td class="small-cell" style="height: 42px; background-color: #00ffff;"></td>
-                {% else %}
-                    <td class="small-cell" style="height: 42px;"></td>
-                {% endif %}
-
-            {% elseif affaire.getDateFin is null %}
-                {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
-                    <td class="small-cell" style="height: 42px; background-color: #00ffff;"></td>
-                {% else %}
-                    <td class="small-cell" style="height: 42px;"></td>
-                {% endif %}
-
-            {% endif %}
-        {% endfor %}
-        </tr>        
-    {% endfor %}
-
-    </tbody>
-    </table>
+                <div class="col-7 table-responsive" style="vertical-align: top;">
+                    <table class="table table-bordered table-sm">
+                        <thead class="thead-dark">
+                            {% for date in tableauDates %}
+                                <th class="small-cell" style="height: 128px">
+                                    <table class="table table-bordered  table-sm  table-sm">
+                                        <tr class="small-cell"><td class="small-cell" style="color:#ffffff; font-size:9px; height: 10px;">{{ date.annee }}</td></tr>
+                                        <tr class="small-cell"><td class="small-cell" style="color:#ffffff; font-size:9px; height: 10px;">{{ joursSemaines[date.jourSemaine] }}</td></tr>
+                                        <tr class="small-cell"><td class="small-cell" style="color:#ffffff; font-size:9px; height: 10px;">{{ date.dateFormatee }}</td></tr>
+                                        <tr class="small-cell"><td class="small-cell" style="color:#ffffff; font-size:9px; height: 10px;">{{ date.numeroSemaine }}</td></tr>
+                                    </table>
+                                </th>
+                            {% endfor %}
+                        </thead>
+                        <tbody>
+                            {% for affaire in affaires %}
+                                {% set fractionnement = 0 %}
+                                {% set FinAffaires = affaire.getDateDebut|date_modify('-1 day') %}
+                                {% set nombreJours = (affaire.NbreHeure) / (affaire.Collaborateur.HrSemaine / affaire.Collaborateur.JourSemaine) %}
+                                {% set nombreJours = nombreJours|round(0, 'ceil') %}
+                                {% set FinAffaires = FinAffaires|date_modify('+' ~ nombreJours ~ ' days') %}
+                                <tr>
+                                    {% for date in tableauDates %}
+                                        {% if date.jourSemaine in weekend or date.dateFormatee in ferie %}
+                                            {% if joursSemaines[date.jourSemaine] == "Sam" %}
+                                                <td class="small-cell" style="height: 10px; font-size:9px;">Sam</td>
+                                                {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
+                                                    {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
+                                                {% endif %}
+                                            {% elseif joursSemaines[date.jourSemaine] == "Dim" %}
+                                                <td class="small-cell" style="height: 10px; font-size:9px;">Dim</td>
+                                                {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
+                                                    {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
+                                                {% endif %}
+                                            {% else %}
+                                                <td class="small-cell" style="height: 10px; font-size:9px;">F</td>
+                                                {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
+                                                    {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
+                                                {% endif %}
+                                            {% endif %}
+                                        {% elseif affaire.getDateFin is not null %} 
+                                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and affaire.getDateFin()|date('m/d') >= date.dateFormatee %}
+                                                <td class="small-cell" style="height: 42px; background-color: #00ffff;"></td>
+                                            {% elseif FinAffaires|date('m/d') < date.dateFormatee and affaire.NbreJourFractionnement > fractionnement  %}
+                                                {% set fractionnement = fractionnement + 1 %}
+                                                <td class="small-cell" style="height: 42px; background-color: #c0c0c0;"></td>
+                                            {% else %}
+                                                <td class="small-cell" style="height: 42px;"></td>
+                                            {% endif %}
+                                        {% elseif affaire.getDateFin is null %}
+                                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
+                                                <td class="small-cell" style="height: 42px; background-color: #00ffff;"></td>
+                                            {% elseif FinAffaires|date('m/d') < date.dateFormatee and affaire.NbreJourFractionnement > fractionnement  %}
+                                                {% set fractionnement = fractionnement + 1 %}
+                                                <td class="small-cell" style="height: 42px; background-color: #c0c0c0;"></td>
+                                            {% else %}
+                                                <td class="small-cell" style="height: 42px;"></td>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </tr>        
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="row">
+                <div class='col text-center p-2'>Aucunes demandes d'interventions enregistrées</div>
+            </div>
+        {% endif %}
 </div>
-        </div>
-    </div>
 {% endblock %}

@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Doctrine\Persistence\ManagerRegistry as PersistenceManagerRegistry;
 
 #[Route('/collaborateur')]
 class CollaborateurController extends AbstractController
@@ -49,10 +50,30 @@ class CollaborateurController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}/edit', name: 'edit_collaborateur')]
+    public function edit(Request $request, Collaborateur $collaborateur, PersistenceManagerRegistry $doctrine): Response
+    {
+        $form = $this->createForm(CollaborateurType::class, $collaborateur);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $doctrine->getManager()->flush();
+
+            return $this->redirectToRoute('show_collaborateur', [
+                'id' => $collaborateur->getId(),
+            ]);
+        }
+
+        return $this->render('collaborateur/edit.html.twig', [
+            'collaborateur' => $collaborateur,
+            'form' => $form->createView(),
+        ]);
+    }
+
     #[Route('/{id}', name: 'show_collaborateur')]
     public function show(Collaborateur $collaborateur, AffaireRepository $affaireRepository): Response
     {
-        $affaires = $affaireRepository->findByCollaborateurId($collaborateur->getId());
+        $affaires = $affaireRepository->findAllByCollaborateur($collaborateur->getId());
 
         $dateDebut = new DateTime('2024-01-01'); // Date de début
         $dateFin = new DateTime('2024-02-29'); // Date de fin
@@ -86,27 +107,6 @@ class CollaborateurController extends AbstractController
             'tableauDates' => $tableauDates,
             'ferie' => $ferie,
             'weekend' => $weekend,
-        ]);
-    }
-
-    #[Route('/edit', name: 'edit_collaborateur')]
-    public function edit(Request $request, EntityManagerInterface $em): Response
-    {
-        $collaborateur = new Collaborateur();
-
-        $form = $this->createForm(CollaborateurType::class, $collaborateur);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Ajoutez ici toute logique de traitement nécessaire pour la création d'une affaire
-            $em->persist($collaborateur);
-            $em->flush();
-
-            return $this->redirectToRoute('collaborateur_index');
-        }
-
-        return $this->render('collaborateur/new.html.twig', [
-            'form' => $form->createView(),
         ]);
     }
 

@@ -6,7 +6,6 @@
     {% block stylesheets %}
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
         <link rel="stylesheet" href="{{ asset('assets/scss/style.css') }}"/>
-        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.6/css/jquery.dataTables.css">
     {% endblock %}
     <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -18,44 +17,47 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script src="https://kit.fontawesome.com/f5c457ed93.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.6/js/jquery.dataTables.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.6/js/dataTables.bootstrap4.min.js"></script>
-   
-
-    <script src="assets/js/script.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.6/js/jquery.dataTables.js"></script>
     {% endblock %}
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Actemium</a>
+        <a class="navbar-brand" style="width: 423px;" href="#">Actemium</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
-        </button>
+        </button>        
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav mx-auto">
-                <li class="nav-item">
+        {% if app.user %}
+            <ul class="navbar-nav mx-auto" >
+                <li class="nav-item {% if app.request.get('_route') starts with 'app_index' %} active {% endif %}">
                     <a class="nav-link" href="/">Accueil</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/new">Affaires</a>
+                <li class="nav-item {% if app.request.get('_route') starts with 'new_affaire' %} active {% endif %}">
+                    <a class="nav-link"  href="/new">Affaires</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item {% if app.request.get('_route') starts with 'collaborateur_index' or app.request.get('_route') ends with 'collaborateur' %} active {% endif %}">
                     <a class="nav-link" href="/collaborateur">Collaborateur</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item {% if app.request.get('_route') starts with 'client' %} active {% endif %}">
                     <a class="nav-link" href="/client/new">Client</a>
                 </li>
             </ul>
-            <ul class="navbar-nav">
+            <ul class="navbar-nav" style="width: 423px;">          
                 <li class="nav-item">
-                    <a class="nav-link" href="/login">Login</a>
-                </li>
+                    <a class="nav-link active">Connecté en tant que {{ app.user.nom }}</a>
+                </li>  
                 <li class="nav-item">
                     <a class="nav-link" href="/logout">Logout</a>
                 </li>
             </ul>
+            {% else %}
+            <ul class="navbar-nav  ml-auto">            
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">Login</a>
+                </li>
+            </ul>
+            {% endif %}
         </div>
+        
     </nav>
     <div class="starter-template mb-5 mt-5 col-12 pr-5 pl-5">
         {% block body %}{% endblock %}
