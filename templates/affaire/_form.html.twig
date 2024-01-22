@@ -7,86 +7,103 @@
     }
 </style>
 
-    <div class="p-4 form container-background">
+<body>
+
+    <div class="container p-4 form">
         <div class="container custom-border">
             <div class="row justify-content-md-center">
-                <div class='col-8'>
-                    <div class='col row'>
-                        <h5>Client</h5>
-                        {{ form_errors(form.client) }}
-                        {{ form_widget(form.client, {'attr': {'class': 'mb-3'}}) }}
+                <div class="col-md-8">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <h5>Client</h5>
+                            {{ form_errors(form.client) }}
+                            {{ form_widget(form.client, {'attr': {'class': 'form-control'}}) }}
+                        </div>
                     </div>
 
-                    <div class='col row'>
-                        <div class='col row'>
-                            <h5>Collaborateur</h5>    
+                    <div class="row mb-3">
+                        <div class="col">
+                            <h5>Collaborateur</h5>
                             {{ form_errors(form.collaborateur) }}
-                            {{ form_widget(form.collaborateur, {'attr': {'class': 'mb-3 mr-3'}}) }}
+                            {{ form_widget(form.collaborateur, {'attr': {'class': 'form-control mb-3 mr-3'}}) }}
                         </div>
-                        <div class='col-md-auto row'>
-                            <h5>Désignation</h5>    
+                        <div class="col-md-auto">
+                            <h5>Numéro d'affaires</h5>
+                            {{ form_errors(form.num_affaire) }}
+                            {{ form_widget(form.num_affaire, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col">
+                            <h5>Désignation</h5>
                             {{ form_errors(form.designation) }}
-                            {{ form_widget(form.designation, {'attr': {'class': 'mb-3'}}) }}
+                            {{ form_widget(form.designation, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <h5>Date De Début</h5>
+                            {{ form_errors(form.date_debut) }}
+                            {{ form_widget(form.date_debut, {'attr': {'class': 'form-control', 'required': 'required'}}) }}
                         </div>
                     </div>
 
-                    <div class='col row'>
-                        <h5>Nombre d'Heure Prévues</h5>            
-                        {{ form_errors(form.nbre_heure) }}
-                        {{ form_widget(form.nbre_heure, {'attr': {'class': 'mb-3'}}) }}
+                    <div class="row mb-3">
+                        <div class="col">
+                            <h5>Date de Fin <span class="h6 font-italic">(facultatif)</span></h5>
+                            {{ form_errors(form.date_fin) }}
+                            {{ form_widget(form.date_fin, {'attr': {'class': 'form-control'}}) }}
+                        </div>
                     </div>
                 </div>
 
-                <div class='col-4'>
-                    <div class='col row'>
-                        <h5>Date De Début</h5>            
-                        {{ form_errors(form.date_debut) }}
-                        {{ form_widget(form.date_debut, {'attr': {'class': 'mb-3', 'required': 'required'}}) }}
-                    </div>
-
-                    <div class='col row'>
-                        <h5>Date de Fin <span class='h6 font-italic'>(facultatif)<span></h5>            
-                        {{ form_errors(form.date_fin) }}
-                        {{ form_widget(form.date_fin, {'attr': {'class': 'mb-3'}}) }}
-                    </div>
-                </div>
-
-                <div class='col-12'>
-                    <div class='col row'>
-                        <h5>Heure Passée <span class='h6 font-italic'>(facultatif)<span></h5>
-                        {{ form_errors(form.heure_passe) }}
-                        {{ form_widget(form.heure_passe, {'attr': {'class': 'mb-3', 'rows': '5'}}) }}
-                    </div>
-                    <div class='col-md-auto row'>
-                        <h5>Numéro d'Affaire</h5>
-                        {{ form_errors(form.num_affaire) }}
-                        {{ form_widget(form.num_affaire, {'attr': {'class': 'mb-3', 'rows': '5'}}) }}
+                <div class="col-md-12">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <h5>Heures Prévue</h5>
+                            {{ form_errors(form.nbre_heure) }}
+                            {{ form_widget(form.nbre_heure, {'attr': {'class': 'form-control', 'rows': '5'}}) }}
+                        </div>
+                        <div class="col-md-auto">
+                            <h5>Heures réelle passée dessus <span class="h6 font-italic">(facultatif)</span> </h5>
+                            {{ form_errors(form.heure_passe) }}
+                            {{ form_widget(form.heure_passe, {'attr': {'class': 'form-control', 'rows': '5'}}) }}
+                        </div>
                     </div>
                 </div>
 
-                <div class='col-12'>
-                    <div class='col row'>
-                        <h5>Nombre de Jour de Fractionnement <span class='h6 font-italic'>(facultatif)<span></h5>
-                        {{ form_errors(form.nbre_jour_fractionnement) }}
-                        {{ form_widget(form.nbre_jour_fractionnement, {'attr': {'class': 'mb-3', 'rows': '5'}}) }}
+                <div class="col-md-12">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <h5>Nombre de Jour de Fractionnement <span class="h6 font-italic">(facultatif)</span></h5>
+                            {{ form_errors(form.nbre_jour_fractionnement) }}
+                            {{ form_widget(form.nbre_jour_fractionnement, {'attr': {'class': 'form-control', 'rows': '5'}}) }}
+                        </div>
                     </div>
                 </div>
 
-                <div class='col-12'>
-                    <div class='col row'>
-                        <h5>Pourcent Réserve <span class='h6 font-italic'>(facultatif)<span></h5>
-                        {{ form_errors(form.pourcent_reserve) }}
-                        {{ form_widget(form.pourcent_reserve, {'attr': {'class': 'mb-3', 'rows': '5'}}) }}
+                <div class="col-md-12">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <h5>Pourcent Réserve <span class="h6 font-italic">(facultatif)</span></h5>
+                            {{ form_errors(form.pourcent_reserve) }}
+                            {{ form_widget(form.pourcent_reserve, {'attr': {'class': 'form-control', 'rows': '5'}}) }}
+                        </div>
                     </div>
                 </div>
 
-                
-                    
-
-                <button class=" green-btn py-2 px-4 mt-3">{{ button_label|default('Valider') }}</button>
+                <div class="col-md-12">
+                    <button class="btn btn-success py-2 px-4 mt-3">{{ button_label|default('Valider') }}</button>
+                </div>
 
             </div>
         </div>
     </div>
+
+</body>
 
 {{ form_end(form) }}

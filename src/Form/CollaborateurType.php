@@ -30,7 +30,12 @@ class CollaborateurType extends AbstractType
                     return $representant->getNom();
                 },
             ])
-            ->add('poste')
+            ->add('poste', EntityType::class, [
+                'class' => 'App\Entity\Poste',
+                'choice_label' => function ($poste) {
+                    return $poste->getNom();
+                },                    
+            ])
         ;
     }
 

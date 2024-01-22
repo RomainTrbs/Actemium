@@ -31,4 +31,38 @@ class AffaireRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
+
+    public function findAllOnGoingByCollaborateur($userId)
+    {
+        return $this->createQueryBuilder('affaire')
+            ->join('affaire.collaborateur', 'collaborateur')
+            ->where('collaborateur.representant = :userId')
+            ->setParameter('userId', $userId)
+            ->orderBy('collaborateur.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findAllOnGoingByClient($userId)
+    {
+        return $this->createQueryBuilder('affaire')
+            ->join('affaire.collaborateur', 'collaborateur')
+            ->where('collaborateur.representant = :userId')
+            ->setParameter('userId', $userId)
+            ->orderBy('affaire.client', 'ASC')  // Specify the complete path to the 'client' field
+            ->getQuery()
+            ->getResult();
+    }
+    
+
+    public function findAllByUser($userId)
+    {
+        return $this->createQueryBuilder('affaire')
+            ->join('affaire.collaborateur', 'collaborateur')
+            ->where('collaborateur.representant = :userId')
+            ->setParameter('userId', $userId)
+            ->orderBy('collaborateur.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

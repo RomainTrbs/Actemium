@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau Poste{% endblock %}
+
+{% block body %}
+    <a href="{{ path('poste_index') }}"><i class="fas fa-chevron-left h1 float-left"></i></a>
+    <h2 class='text-center mb-5 font-weight-bold'>Nouveau Poste</h2>
+
+    {{ include('poste/_form.html.twig') }}
+{% endblock %}

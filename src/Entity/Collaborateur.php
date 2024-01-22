@@ -32,8 +32,8 @@ class Collaborateur
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'collaborateur')]
     private User $representant ;
 
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $poste = null;
+    #[ORM\ManyToOne(targetEntity: Poste::class, inversedBy: 'collaborateur')]
+    private Poste $poste ;
 
     public function getId(): ?int
     {
@@ -112,12 +112,12 @@ class Collaborateur
         return $this;
     }
 
-    public function getPoste(): ?string
+    public function getPoste(): ?Poste
     {
         return $this->poste;
     }
 
-    public function setPoste(?string $poste): static
+    public function setPoste(?Poste $poste): static
     {
         $this->poste = $poste;
 

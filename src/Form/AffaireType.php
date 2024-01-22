@@ -10,20 +10,26 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 
 class AffaireType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $userId = $options['userId'];
         $builder
             // ... other fields
             ->add('client')
-            ->add('num_affaire')
+            ->add('num_affaire', TextType::class, [
+                'required' => true
+            ])
             ->add('collaborateur', EntityType::class, [
                 'class' => Collaborateur::class,
-                'query_builder' => function (CollaborateurRepository $cr) {
+                'query_builder' => function (CollaborateurRepository $cr) use ($userId) {
                     return $cr->createQueryBuilder('c')
+                        ->andWhere('c.representant = :representantId')
+                        ->setParameter('representantId', $userId)
                         ->orderBy('c.nom', 'ASC');
                 },
                 'choice_label' => function ($collaborateur) {
@@ -34,7 +40,7 @@ class AffaireType extends AbstractType
             ->add('nbre_heure')
             ->add('date_debut', DateType::class, [
                 'widget' => 'single_text',
-                'required' => false,
+                'required' => true,
             ])
             ->add('heure_passe')
             ->add('date_fin', DateType::class, [
@@ -49,8 +55,7 @@ class AffaireType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Affaire::class,
+            'userId' => null, // Define the userId option with a default value
         ]);
     }
 }
-
-?>

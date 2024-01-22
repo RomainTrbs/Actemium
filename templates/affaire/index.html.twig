@@ -32,6 +32,25 @@
 } %}
 
 <h2 align="center">Tableau des Affaires</h2>
+<div class="row">
+    <div class="col-9"><!-- Content on the left --></div>
+    
+    <div class="col-3">
+        <div class="form-container">
+            {{ form_start(form) }}
+            <div class="form-group">
+                {{ form_row(form.firstDate, {'attr': {'class': 'form-control'}, 'label': false}) }}
+            </div>
+            <div class="form-group">
+                {{ form_row(form.lastDate, {'attr': {'class': 'form-control'}, 'label': false}) }}
+            </div>
+            <div class="form-group">
+                {{ form_row(form.validate) }}
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
 <hr>
 <div class="row">
 <div class="col-5 table-responsive" style="vertical-align: top;">
@@ -51,10 +70,28 @@
                 <th class="small-cell" style="height: 128px; font-size: 10px; width: 23px">%Temps Réserve</th>                        
             </tr>
         </thead>
-        <tbody style="height: 42px;">
+        <tbody style="height: 42px;">        
             {% for affaire in affaires %}
+                {% if collaborateur_precedent is defined %}
+                                    {# {{ affaire.Collaborateur.nom }}
+                    {{ collaborateur_precedent.nom }} #}
+                    {% if filter == 'collaborateur' and affaire.Collaborateur.nom != collaborateur_precedent.nom %}                    
+                    <tr>
+                        <td class="small-cell" style="background-color:#ffff00;"></td>
+                        <td class="small-cell" style="background-color:#ffff00;"></td>
+                        <td class="small-cell" style="background-color:#ffff00;"></td>
+                        <td class="small-cell" style="background-color:#ffff00;"></td>
+                        <td class="small-cell" style="background-color:#ffff00;"></td>
+                        <td class="small-cell" style="background-color:#ffff00;"></td>
+                        <td class="small-cell" style="background-color:#ffff00;"></td>
+                        <td class="small-cell" style="background-color:#ffff00;"></td>
+                        <td class="small-cell" style="background-color:#ffff00;"></td>
+                        <td class="small-cell" style="background-color:#ffff00;"></td>                
+                    </tr>
+                    {% endif %}
+                {% endif %}
                 <tr>
-                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.NumAffaire }}</td>
+                    <td class="small-cell" style="font-size: 10px; height: 42px;"><a href="/edit/{{ affaire.id }}">{{ affaire.NumAffaire }}</a></td>
                     <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.Collaborateur.nom }} {{ affaire.Collaborateur.prenom }}</td>
                     <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.Client }}</td>
                     <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.Designation }}</td>
@@ -72,6 +109,7 @@
 
                     {# Répéter ces cellules vides pour chaque jour #}
                 </tr>
+                {% set collaborateur_precedent = affaire.collaborateur %}
             {% endfor %}
         </tbody>
     </table>
@@ -101,6 +139,15 @@
             {% set nombreJours = (affaire.NbreHeure) / (affaire.Collaborateur.HrSemaine / affaire.Collaborateur.JourSemaine) %}
             {% set nombreJours = nombreJours|round(0, 'ceil') %}
             {% set FinAffaires = FinAffaires|date_modify('+' ~ nombreJours ~ ' days') %}
+            {% if collaborateur_precedent is defined %}
+                {% if filter == 'collaborateur' and affaire.collaborateur != collaborateur_precedent %}
+                <tr>
+                {% for date in tableauDates %}
+                    <td class="small-cell" style="background-color:#ffff00;"></td>
+                {% endfor %}           
+                </tr>
+                {% endif %}
+            {% endif %} 
     <tr>
         {% for date in tableauDates %}
             {% if date.jourSemaine in weekend or date.dateFormatee in ferie %}
@@ -146,9 +193,9 @@
 
             {% endif %}
         {% endfor %}
-        </tr>        
+        </tr>  
+            {% set collaborateur_precedent = affaire.collaborateur %}      
     {% endfor %}
-
     </tbody>
     </table>
 </div>

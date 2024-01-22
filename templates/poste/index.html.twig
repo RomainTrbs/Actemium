@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Poste{% endblock %}
+
+{% block javascripts %}        
+    <script src="{{ asset('assets/js/searchBar.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+    <div class='text-center mb-2'>	
+        <div class='h2 mb-3 font-weight-bold'>Liste des postes</div>
+    </div>
+    <div class='text-center mb-2'>	
+        <a href='{{ path('poste_new') }}'><input type='button' value="Ajouter une fiche poste" class='grey-btn f-20 py-2 px-4' /></a>
+    </div>
+
+    <hr>
+
+    <input class='w-100 mb-3 p-2' type="text" id="searchBar" placeholder="Rechercher un poste">
+
+    <div class='container list'>
+        <div class="row tab-head p-2">
+            <div class="col-3">Nom</div>
+        </div>
+
+        {% for poste in postes %}
+            <a class='data-row' href="{{ path('edit_poste', {'id': poste.id}) }}">
+                <div class="row link default p-2">
+                    <div class="col-3 my-auto">{{ poste.nom }}</div>
+                </div>
+            </a>
+        {% else %}
+            <div class="row">
+                <div class='col text-center alert-label p-2'>Aucun poste enregistrés</div>
+            </div>
+        {% endfor %}
+        
+    </div>
+{% endblock %}
