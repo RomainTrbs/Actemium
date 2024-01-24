@@ -3,12 +3,20 @@ security:
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+
     providers:
-        # used to reload user from session & other features (e.g. switch_user)
-        app_user_provider:
+        chain_provider:
+            chain:
+                providers: [user_provider, collaborateur_provider]
+        user_provider:
             entity:
                 class: App\Entity\User
                 property: username
+        collaborateur_provider:
+            entity:
+                class: App\Entity\Collaborateur
+                property: username
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -17,7 +25,7 @@ security:
             login_throttling:
                 max_attempts: 3
             lazy: true
-            provider: app_user_provider
+            provider: chain_provider
             form_login:
                 enable_csrf: true
                 # "app_login" is the name of the route created previously
