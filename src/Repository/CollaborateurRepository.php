@@ -30,6 +30,16 @@ class CollaborateurRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findByUserId(int $id)
+    {
+        return $this->createQueryBuilder('a')
+            ->andWhere('a.representant = :representant')
+            ->setParameter('representant', $id)
+            ->orderBy('a.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return Collaborateur[] Returns an array of Collaborateur objects
 //     */

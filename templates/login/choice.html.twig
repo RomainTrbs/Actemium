@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Choose Role{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <a href="{{ path('app_login', { '_target_path': '/login' }) }}" class="btn btn-primary">User</a>
+                <a href="{{ path('app_login', { '_target_path': '/login-admin' }) }}" class="btn btn-primary">Admin</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -5,9 +5,10 @@ namespace App\Entity;
 use App\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\CollaborateurRepository;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: CollaborateurRepository::class)]
-class Collaborateur
+class Collaborateur implements UserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -34,6 +35,15 @@ class Collaborateur
 
     #[ORM\ManyToOne(targetEntity: Poste::class, inversedBy: 'collaborateur')]
     private Poste $poste ;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $username = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $password = null;
+
+    #[ORM\Column(nullable: true)]
+    private array $roles = [];
 
     public function getId(): ?int
     {
@@ -123,4 +133,59 @@ class Collaborateur
 
         return $this;
     }
+
+    public function getUsername(): ?string
+    {
+        return $this->username;
+    }
+
+    public function setUsername(?string $username): static
+    {
+        $this->username = $username;
+
+        return $this;
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(?string $password): static
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    public function getRoles(): array
+    {
+        return $this->roles;
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+        /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->username;
+    }
+        /**
+     * @see UserInterface
+     */
+    public function eraseCredentials(): void
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
+    }
+
 }

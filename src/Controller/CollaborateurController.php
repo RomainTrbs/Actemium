@@ -21,7 +21,8 @@ class CollaborateurController extends AbstractController
     #[Route('/', name: 'collaborateur_index')]
     public function index(CollaborateurRepository $collaborateurRepository): Response
     {
-        $collaborateurs = $collaborateurRepository->findAll();
+        $user = $this->getUser();
+        $collaborateurs = $collaborateurRepository->findByUserId($user->getId());
 
         return $this->render('collaborateur/index.html.twig', [
             'controller_name' => 'CollaborateurController',

@@ -1,35 +1,35 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des Collaborateur{% endblock %}
+{% block title %}Liste des Collaborateurs{% endblock %}
 
 {% block javascripts %}        
     <script src="{{ asset('assets/js/searchBar.js') }}"></script>
 {% endblock %}
 
 {% block body %}
-    <div class='text-center mb-2'>	
-        <div class='h2 mb-3 font-weight-bold'>Liste des collaborateurs</div>
+    <div class="text-center mb-4">	
+        <div class="h2 mb-3 font-weight-bold">Liste des collaborateurs</div>
     </div>
-    <div class='text-center mb-2'>	
-        <a href='{{ path('new_collaborateur') }}'><input type='button' value="Ajouter une fiche collaborateur" class='grey-btn f-20 py-2 px-4' /></a>
+    <div class="text-center mb-4">	
+        <a href="{{ path('new_collaborateur') }}">
+            <button class="btn btn-primary btn-lg" style="background-color: #1d5294; border-color: #1d5294;">Ajouter une fiche collaborateur</button>
+        </a>
     </div>
 
     <hr>
 
-    <input class='w-100 mb-3 p-2' type="text" id="searchBar" placeholder="Rechercher un collaborateur">
-
-    <div class='container list'>
-        <div class="row tab-head p-2">
-            <div class="col-3">Nom</div>
-            <div class="col-3">Prénom</div>
-            <div class="col-2">Heures/Jour</div>
-            <div class="col-2">Heures/Semaine</div>
-            <div class="col-2">Jours/Semaine</div>
+    <div class="container mt-4">
+        <div class="row tab-head text-white p-2 rounded" style="background-color: #1d5294;">
+            <div class="col-3"  style="background-color: #1d5294;">Nom</div>
+            <div class="col-3"  style="background-color: #1d5294;">Prénom</div>
+            <div class="col-2" style="background-color: #1d5294;">Heures/Jour</div>
+            <div class="col-2" style="background-color: #1d5294;">Heures/Semaine</div>
+            <div class="col-2" style="background-color: #1d5294;">Jours/Semaine</div>
         </div>
 
         {% for collaborateur in collaborateurs %}
-            <a class='data-row' href="{{ path('show_collaborateur', {'id': collaborateur.id}) }}">
-                <div class="row link default p-2">
+            <a class="data-row" href="{{ path('show_collaborateur', {'id': collaborateur.id}) }}">
+                <div class="row link default p-2 rounded mb-2" style="background-color: #dddddd; color: #000000;">
                     <div class="col-3 my-auto">{{ collaborateur.nom }}</div>
                     <div class="col-3 my-auto">{{ collaborateur.prenom }}</div>
                     <div class="col-2 my-auto">{{ collaborateur.HrJour }}</div>
@@ -39,9 +39,19 @@
             </a>
         {% else %}
             <div class="row">
-                <div class='col text-center alert-label p-2'>Aucun collaborateur enregistrés</div>
+                <div class="col text-center alert-label p-2 bg-warning rounded">
+                    Aucun collaborateur enregistré
+                </div>
             </div>
         {% endfor %}
         
     </div>
+
+    <style>
+        .btn-primary,
+        .btn-primary:hover {
+            background-color: #1d5294;
+            border-color: #1d5294;
+        }
+    </style>
 {% endblock %}
