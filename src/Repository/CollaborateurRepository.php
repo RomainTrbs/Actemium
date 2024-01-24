@@ -2,9 +2,10 @@
 
 namespace App\Repository;
 
+use App\Entity\Status;
 use App\Entity\Collaborateur;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @extends ServiceEntityRepository<Collaborateur>
@@ -26,6 +27,15 @@ class CollaborateurRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('a')
             ->andWhere('a.collaborateur = :collaborateur')
             ->setParameter('collaborateur', $collaborateur)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findAllByStatus(Status $status)
+    {
+        return $this->createQueryBuilder('a')
+            ->andWhere('a.status = :status')
+            ->setParameter('status', $status)
             ->getQuery()
             ->getResult();
     }

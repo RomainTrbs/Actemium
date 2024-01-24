@@ -35,6 +35,9 @@ class Collaborateur
     #[ORM\ManyToOne(targetEntity: Poste::class, inversedBy: 'collaborateur')]
     private Poste $poste ;
 
+    #[ORM\ManyToOne(targetEntity: Status::class, inversedBy: 'collaborateur')]
+    private Status $status ;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -120,6 +123,18 @@ class Collaborateur
     public function setPoste(?Poste $poste): static
     {
         $this->poste = $poste;
+
+        return $this;
+    }
+
+    public function getStatus(): ?Status
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?Status $status): static
+    {
+        $this->status = $status;
 
         return $this;
     }

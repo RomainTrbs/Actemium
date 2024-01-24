@@ -24,10 +24,16 @@ class CollaborateurType extends AbstractType
                 'class' => User::class,
                 'query_builder' => function (UserRepository $cr) {
                     return $cr->createQueryBuilder('c')
-                        ->orderBy('c.nom', 'ASC');
+                        ->leftJoin('c.collaborateur', 'col') // Assuming Collaborateur entity has a 'collaborateur' property in User entity
+                        ->leftJoin('col.status', 's')
+                        ->where('s.nom != :statusNom OR s.nom IS NULL') // Exclude users with 'collaborateur' postes
+                        ->setParameter('statusNom', 'collaborateur')
+                        ->orderBy('c.username', 'ASC'); // Assuming User entity has a 'username' property
                 },
                 'choice_label' => function ($representant) {
-                    return $representant->getNom();
+                    $representant = $representant->getCollaborateur();
+                    $representant = $representant->getPrenom() . ' ' . $representant->getNom();
+                    return $representant; // Assuming User entity has a 'getUsername()' method
                 },
             ])
             ->add('poste', EntityType::class, [

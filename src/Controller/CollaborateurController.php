@@ -6,6 +6,7 @@ use DateTime;
 use App\Form\AffaireType;
 use App\Entity\Collaborateur;
 use App\Form\CollaborateurType;
+use App\Repository\StatusRepository;
 use App\Repository\AffaireRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\CollaborateurRepository;
@@ -19,9 +20,10 @@ use Doctrine\Persistence\ManagerRegistry as PersistenceManagerRegistry;
 class CollaborateurController extends AbstractController
 {
     #[Route('/', name: 'collaborateur_index')]
-    public function index(CollaborateurRepository $collaborateurRepository): Response
+    public function index(CollaborateurRepository $collaborateurRepository, StatusRepository $statusRepository): Response
     {
-        $collaborateurs = $collaborateurRepository->findAll();
+        $status = $statusRepository->find(2); 
+        $collaborateurs = $collaborateurRepository->findAllByStatus($status);
 
         return $this->render('collaborateur/index.html.twig', [
             'controller_name' => 'CollaborateurController',
