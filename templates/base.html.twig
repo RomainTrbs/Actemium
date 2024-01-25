@@ -29,7 +29,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
         {% if app.user %}
             <ul class="navbar-nav mx-auto" >
-                <li class="nav-item {% if app.request.get('_route') starts with 'app_index' %} active {% endif %}">
+                <li class="nav-item {% if app.request.get('_route') starts with 'affaire_index' %} active {% endif %}">
                     <a class="nav-link" href="/">Accueil</a>
                 </li>
                 <li class="nav-item {% if app.request.get('_route') starts with 'new_affaire' %} active {% endif %}">
@@ -38,8 +38,8 @@
                 <li class="nav-item {% if app.request.get('_route') starts with 'collaborateur_index' or app.request.get('_route') ends with 'collaborateur' %} active {% endif %}">
                     <a class="nav-link" href="/collaborateur">Collaborateur</a>
                 </li>
-                <li class="nav-item {% if app.request.get('_route') starts with 'client' %} active {% endif %}">
-                    <a class="nav-link" href="#">Client</a>
+                <li class="nav-item {% if app.request.get('_route') starts with 'app' %} active {% endif %}">
+                    <a class="nav-link" href="/user">Utilisateur</a>
                 </li>
             </ul>
             <ul class="navbar-nav" style="width: 423px;">          

@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Utilisateurs{% endblock %}
+
+{% block javascripts %}        
+    <!-- Include custom JavaScript for search functionality -->
+    <script src="{{ asset('assets/js/searchBar.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+    <div class='container mt-4'>
+        <div class='text-center mb-4'>	
+            <h2 class='font-weight-bold'>Liste des Utilisateurs</h2>
+        </div>
+        <div class='text-center mb-4'>	
+            <a href='{{ path('app_choose') }}'>
+                <button class='btn btn-secondary btn-lg'>Ajouter un utilisateur</button>
+            </a>
+        </div>
+
+        <hr>
+
+        <!-- Search bar for collaborator search -->
+        <input class='form-control mb-3' type="text" id="searchBar" placeholder="Rechercher un utilisateur">
+
+        <!-- Collaborator list container -->
+        <div class='container'>
+            <!-- Table header row -->
+            <div class="row bg-dark text-light py-2">
+                <div class="col-4">Nom</div>
+                <div class="col-4">Prénom</div>
+                <div class="col-4">Identifiant</div>
+            </div>
+
+            <!-- Loop through utilisateurs and display details -->
+            {% for user in users %}
+                <a class='data-row' href="{{ path('app_show_user', {'id': user.id}) }}">
+                    <div class="row border-bottom py-2">
+                        <div class="col-4 my-auto">{{ user.collaborateur.nom }}</div>
+                        <div class="col-4 my-auto">{{ user.collaborateur.prenom }}</div>
+                        <div class="col-4 my-auto">{{ user.username }}</div>
+                    </div>
+                </a>
+            {% else %}
+                <!-- Display a message if no collaborators are found -->
+                <div class="row">
+                    <div class='col text-center alert alert-danger p-2'>Aucun utilisateur enregistré</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

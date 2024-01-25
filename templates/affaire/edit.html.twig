@@ -3,7 +3,7 @@
 {% block title %}Modifier la demande d'affaire{% endblock %}
 
 {% block body %}
-    <a href="{{ path('app_index') }}"><i class="fas fa-chevron-left h1 float-left"></i></a>
+    <a href="{{ path('affaire_index') }}"><i class="fas fa-chevron-left h1 float-left"></i></a>
     <h2 class='text-center mb-5 font-weight-bold'>Modifier la demande d'affaire</h2>
 
     {{ include('affaire/_form.html.twig', {'button_label': 'Mettre à jour'}) }}

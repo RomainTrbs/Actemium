@@ -8,11 +8,13 @@ use App\Entity\User;
 use App\Entity\Affaire;
 use App\Form\AffaireType;
 use App\Entity\Collaborateur;
+use App\Repository\UserRepository;
 use App\Controller\AffaireController;
-use App\Repository\AffaireRepository;
 
+use App\Repository\AffaireRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Repository\CollaborateurRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,12 +27,15 @@ use Doctrine\Persistence\ManagerRegistry as PersistenceManagerRegistry;
 
 class AffaireController extends AbstractController
 {
-    #[Route('/', name: 'app_index')]
-    public function index(AffaireRepository $affaireRepository, Security $security, Request $request): Response
+    #[Route('/', name: 'affaire_index')]
+    public function index(AffaireRepository $affaireRepository, UserRepository $userRepository, CollaborateurRepository $collaborateurRepository, Security $security, Request $request): Response
     {
-        
+    
         $user = $this->getUser();
+        $user = $user->getCollaborateur();
+        $user = $user->getRepresentant();
         $affaires = $affaireRepository->findAllByUser($user->getId());
+
         $filter = 'collaborateur';
 
         $session = $request->getSession();
@@ -64,7 +69,7 @@ class AffaireController extends AbstractController
             $session->set('lastDate', $lastDate);
 
             // Redirect the user to the same route with parameters dd and df
-            return $this->redirectToRoute('app_index');
+            return $this->redirectToRoute('affaire_index');
         }
 
         // Handle other form submission logic here
@@ -88,7 +93,7 @@ class AffaireController extends AbstractController
 
         // Check if the user is logged in
         if (!$user instanceof User) {
-            throw new LogicException('This should not happen. Make sure your security configuration is correct.');
+            throw new LogicException('Aucun utilisateur connecté');
         }
 
         // // Retrieve affaires related to the user
@@ -157,7 +162,7 @@ class AffaireController extends AbstractController
     
         $entityManager->flush();
     
-        return $this->redirectToRoute('app_index');
+        return $this->redirectToRoute('affaire_index');
     }
 
     #[Route('/new', name: 'new_affaire')]
@@ -178,7 +183,7 @@ class AffaireController extends AbstractController
             $em->persist($affaire);
             $em->flush();
 
-            return $this->redirectToRoute('app_index', ['id' => $affaire->getId()]);
+            return $this->redirectToRoute('affaire_index', ['id' => $affaire->getId()]);
         }
 
         return $this->render('affaire/new.html.twig', [
@@ -214,7 +219,7 @@ class AffaireController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $doctrine->getManager()->flush();
 
-            return $this->redirectToRoute('app_index');
+            return $this->redirectToRoute('affaire_index');
         }
 
         return $this->render('affaire/edit.html.twig', [
@@ -238,6 +243,6 @@ class AffaireController extends AbstractController
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_index');
+        return $this->redirectToRoute('affaire_index');
     }
 }

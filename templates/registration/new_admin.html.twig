@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel Utilisateur{% endblock %}
+
+{% block body %}
+    <a href="{{ path('app_user') }}"><i class="fas fa-chevron-left h1 float-left"></i></a>
+    <h2 class='text-center mb-5 font-weight-bold'>Nouvel Utilisateur</h2>
+
+
+    {{ include('registration/register_admin.html.twig', {'button_label': 'Mettre à jour'}) }}
+
+{% endblock %}

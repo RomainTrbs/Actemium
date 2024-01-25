@@ -1,5 +1,4 @@
 {{ form_start(registrationForm) }}
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,7 +13,7 @@
             border-color: #bed73e #1d5294 #1d5294 #bed73e;
         }
     </style>
-    <title>Your Form Title</title>
+    <title>Nouvel Utilisateur</title>
 </head>
 
 <body>
@@ -26,11 +25,9 @@
                 {{ form_errors(registrationForm) }}
 
                 {{ form_start(registrationForm) }}
-                
 
-                <div class="form-group">
-                    {{ form_row(registrationForm.collaborateur, {'label': 'Créer un compte pour : ', 'attr': {'class': 'form-control mb-3'}}) }}
-                </div>
+                                {{ form_row(collaborateurForm.nom, {'label': 'Nom', 'attr': {'class': 'form-control mb-3'}}) }}
+                {{ form_row(collaborateurForm.prenom, {'label': 'Prenom', 'attr': {'class': 'form-control mb-3'}}) }}
                 
                 <div class="form-group">
                     {{ form_row(registrationForm.username, {'label': "Nom d'utilisateur", 'attr': {'class': 'form-control mb-3'}}) }}
@@ -44,6 +41,10 @@
                     {{ form_row(registrationForm.plainPassword.second, {'label': 'Confirmer le mot de passe', 'attr': {'class': 'form-control mb-3'}}) }}
                 </div>
 
+
+                {# {{ freshUser.username }}
+                {{ freshCollaborateur.id }} #}
+                 {% do registrationForm.collaborateur.setRendered() %}
 
                 <button type="submit" class="btn btn-primary">Créer le compte</button>
                 {{ form_end(registrationForm) }}

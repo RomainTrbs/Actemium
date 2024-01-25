@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier l'utilisateur{% endblock %}
+
+{% block body %}
+    <a href="{{ path('app_show_user', {'id': user.id}) }}"><i class="fas fa-chevron-left h1 float-left"></i></a>
+    <h2 class='text-center mb-5 font-weight-bold'>Modifier l'utilisateur</h2>
+
+    {% if is_granted('ROLE_ADMIN') %}
+        {{ include('registration/register_admin.html.twig', {'button_label': 'Mettre à jour'}) }}
+    {% else %}
+        {{ include('registration/register.html.twig', {'button_label': 'Mettre à jour'}) }}
+    {% endif %}
+{% endblock %}

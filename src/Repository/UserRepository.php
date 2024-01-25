@@ -39,6 +39,16 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
+    public function findAllByRepresentant($userId)
+    {
+        return $this->createQueryBuilder('user')
+            ->join('user.collaborateur', 'collaborateur')
+            ->where('collaborateur.representant = :userId')
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return User[] Returns an array of User objects
 //     */
