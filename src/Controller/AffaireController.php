@@ -176,14 +176,23 @@ class AffaireController extends AbstractController
         $form = $this->createForm(AffaireType::class, $affaire, [
             'userId' => $userId,
         ]);
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Ajoutez ici toute logique de traitement nécessaire pour la création d'une affaire
-            $em->persist($affaire);
-            $em->flush();
+            $collaborateurs = $form->get('collaborateurs')->getData();
 
-            return $this->redirectToRoute('affaire_index', ['id' => $affaire->getId()]);
+            foreach ($collaborateurs as $collaborateurData) {
+                $newAffaire = new Affaire();
+                $newAffaire->setClient($affaire->getClient());
+                $newAffaire->setDesignation($affaire->getDesignation());
+                $newAffaire->setCollaborateur($collaborateurData); // Assuming $collaborateurData is an array with collaborator data
+
+                $em->persist($newAffaire);
+                $em->flush();
+            }
+
+            return $this->redirectToRoute('affaire_index');
         }
 
         return $this->render('affaire/new.html.twig', [

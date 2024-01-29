@@ -7,4 +7,9 @@
     <h2 class='text-center mb-5 font-weight-bold'>Modifier les Informations Collaborateur</h2>
 
     {{ include('collaborateur/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+            <center>
+            <a href="{{ path('show_collaborateur', {'id': collaborateur.id}) }}" class="float mt-2">
+                <button class="btn btn-secondary">Retour</button>
+            </a>
+        </center>
 {% endblock %}

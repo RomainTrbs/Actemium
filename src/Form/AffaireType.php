@@ -24,8 +24,9 @@ class AffaireType extends AbstractType
             ->add('num_affaire', TextType::class, [
                 'required' => true
             ])
-            ->add('collaborateur', EntityType::class, [
+            ->add('collaborateurs', EntityType::class, [
                 'class' => Collaborateur::class,
+                'multiple' => true,
                 'query_builder' => function (CollaborateurRepository $cr) use ($userId) {
                     return $cr->createQueryBuilder('c')
                         ->andWhere('c.representant = :representantId')

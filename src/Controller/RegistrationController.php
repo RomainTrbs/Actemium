@@ -154,7 +154,18 @@ class RegistrationController extends AbstractController
     #[Route('/{id}/edit', name: 'app_edit_user')]
     public function edit(Request $request, User $user, PersistenceManagerRegistry $doctrine): Response
     {
-        $form = $this->createForm(RegistrationFormType::class, $user);
+        $collaborateur = $user->getCollaborateur();
+
+        $user = $this->getUser();
+        if (in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
+            $userId = 0;
+        } else{
+            $userId = $user->getId();
+        }   
+
+        $form = $this->createForm(RegistrationFormType::class, $user, [
+            'userId' => $userId,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -168,6 +179,7 @@ class RegistrationController extends AbstractController
         return $this->render('registration/edit.html.twig', [
             'user' => $user,
             'registrationForm' => $form->createView(),
+
         ]);
     }
 

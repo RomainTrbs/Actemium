@@ -25,7 +25,10 @@
 <div class="starter-template mb-5 mt-5 col-12 pr-5 pl-5">
     <div class="text-center">	
         <h2 align="center">Gestion du Collaborateur</h2>
-        <a class="btn btn-secondary f-20 px-4 py-2" href="{{ path('edit_collaborateur', {'id': collaborateur.id}) }}">Modifier</a>
+        <a href="{{ path('collaborateur_index') }}" class="float mt-2">
+            <button class="btn btn-secondary">Retour</button>
+        </a>
+        <a class="btn btn-secondary" href="{{ path('edit_collaborateur', {'id': collaborateur.id}) }}">Modifier</a>
         {{ include('collaborateur/_delete_form.html.twig') }}
     </div>
     <hr>

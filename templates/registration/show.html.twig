@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-    {{ user.username }} - Détails de l'utilisateur
+    Détails de l'utilisateur
 {% endblock %}
 
 {% block body %}
@@ -28,7 +28,26 @@
                         {% endif %}
                     </dd>
                 </dl>
+                
+                {# Add buttons here #}
+                <div class="mt-3">
+                    {# Button to upgrade user roles to ROLE_SUPER_ADMIN #}
+                    <button class="btn btn-danger" onclick="confirmUpgrade()">Définir comme SUPER ADMIN</button>
+
+                    {# Button to redirect to edit.html.twig page #}
+                    <a href="{{ path('app_edit_user', {'id': user.id}) }}" class="btn btn-primary">Modifier</a>
+                </div>
             </div>
         </div>
     </div>
+
+    {# JavaScript code for confirmation alert #}
+    <script>
+        function confirmUpgrade() {
+            var confirmation = confirm("Etes vous sure de vouloir augmenter les droits de cette utilisateur au rang de SUPER ADMIN ?");
+            if (confirmation) {
+                // Add logic to trigger the upgrade process (e.g., via AJAX or form submission)
+            }
+        }
+    </script>
 {% endblock %}

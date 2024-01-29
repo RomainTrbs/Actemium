@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Détails de l'utilisateur
+{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">        
+        <div class="card">
+            <div class="card-header">
+                <h2 class="font-weight-bold mb-0">{{ poste.nom }}</h2>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Nom du poste :</dt>
+                    <dd class="col-sm-9">{{ poste.nom }}</dd>
+                </dl>                
+                <div class="mt-3">
+                    <a href="{{ path('edit_poste', {'id': poste.id}) }}" class="btn btn-secondary">Modifier</a>
+                {# </div>
+                <div class="mt-3"> #}
+                    {{ include('poste/_delete_form.html.twig') }}
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <h2 class="font-weight-bold mb-0">Collaborateurs ayant ce poste</h2>
+            </div>
+            <div class="card-body">
+                {% if collaborateurs|length > 0 %}
+                    <ul class="list-group">
+                        {% for collaborateur in collaborateurs %}
+                            <li class="list-group-item">{{ collaborateur.prenom }} {{ collaborateur.nom }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>Aucun collaborateur à ce poste.</p>
+                {% endif %}
+            </div>
+        </div>
+        </br>
+        <center>
+            <a href="{{ path('poste_index') }}" class="float mt-2">
+                <button class="btn btn-secondary">Retour</button>
+            </a>
+        </center>
+    </div>
+{% endblock %}

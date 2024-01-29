@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Entity\User;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\CollaborateurRepository;
 
@@ -29,14 +31,23 @@ class Collaborateur
     #[ORM\Column(nullable: true)]
     private ?int $jour_semaine = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'collaborateur')]
-    private User $representant ;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: "representant_id", referencedColumnName: "id")]
+    private ?User $representant = null;
 
     #[ORM\ManyToOne(targetEntity: Poste::class, inversedBy: 'collaborateur')]
     private Poste $poste ;
 
     #[ORM\ManyToOne(targetEntity: Status::class, inversedBy: 'collaborateur')]
     private Status $status ;
+
+    #[ORM\OneToMany(targetEntity: Affaire::class, mappedBy: 'collaborateur')]
+    private Collection $affaires;
+
+    public function __construct()
+    {
+        $this->affaires = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -135,6 +146,33 @@ class Collaborateur
     public function setStatus(?Status $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Affaire>
+     */
+    public function getAffaires(): Collection
+    {
+        return $this->affaires;
+    }
+
+    public function addAffaire(Affaire $affaire): static
+    {
+        if (!$this->affaires->contains($affaire)) {
+            $this->affaires->add($affaire);
+            $affaire->addCollaborateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAffaire(Affaire $affaire): static
+    {
+        if ($this->affaires->removeElement($affaire)) {
+            $affaire->removeCollaborateur($this);
+        }
 
         return $this;
     }

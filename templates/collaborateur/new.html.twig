@@ -7,4 +7,9 @@
     <h2 class='text-center mb-5 font-weight-bold'>Nouveau Collaborateur</h2>
 
     {{ include('collaborateur/_form.html.twig') }}
+            <center>
+            <a href="{{ path('collaborateur_index') }}" class="float mt-2">
+                <button class="btn btn-secondary">Retour</button>
+            </a>
+        </center>
 {% endblock %}

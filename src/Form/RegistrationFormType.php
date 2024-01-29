@@ -19,6 +19,7 @@ class RegistrationFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $userId = $options['userId'];
         $builder
             ->add('username')
             ->add('collaborateur', EntityType::class, [
@@ -26,10 +27,11 @@ class RegistrationFormType extends AbstractType
                 'choice_label' => function ($collaborateur) {
                     return $collaborateur->getNom() . ' ' . $collaborateur->getPrenom();
                 },
-                'query_builder' => function (EntityRepository $er) {
+                'query_builder' => function (EntityRepository $er) use ($userId) {
                     return $er->createQueryBuilder('c')
-                        ->leftJoin('App\Entity\User', 'u', 'WITH', 'u.collaborateur = c.id') // Adjust 'collaborateur' to the actual property name in User entity representing the Collaborateur relationship
-                        ->where('u.id IS NULL'); // Exclude collaborators who already have a relationship
+                        ->leftJoin('App\Entity\User', 'u', 'WITH', 'u.collaborateur = c.id')
+                        ->where('u.id IS NULL OR u.id = :userId')
+                        ->setParameter('userId', $userId);
                 },
             ])
             ->add('plainPassword', RepeatedType::class, [
@@ -57,6 +59,7 @@ class RegistrationFormType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => User::class,
+            'userId' => null,
         ]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Poste;
 use App\Entity\Status;
 use App\Entity\Collaborateur;
 use Doctrine\Persistence\ManagerRegistry;
@@ -38,6 +39,26 @@ class CollaborateurRepository extends ServiceEntityRepository
             ->setParameter('status', $status)
             ->getQuery()
             ->getResult();
+    }
+
+    public function findAllByPoste(Poste $poste)
+    {
+        return $this->createQueryBuilder('a')
+            ->andWhere('a.poste = :poste')
+            ->setParameter('poste', $poste)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findAllByRepresentantAndStatus(int $idRepresentant, Status $status)
+    {
+        return $this->createQueryBuilder('c')
+        ->andWhere('c.representant = :idRepresentant')
+        ->andWhere('c.status = :status')
+        ->setParameter('idRepresentant', $idRepresentant)
+        ->setParameter('status', $status)
+        ->getQuery()
+        ->getResult();
     }
 
 //    /**

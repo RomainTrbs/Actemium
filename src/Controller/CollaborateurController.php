@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use DateTime;
+use App\Entity\User;
 use App\Form\AffaireType;
 use App\Entity\Collaborateur;
 use App\Form\CollaborateurType;
@@ -22,8 +23,13 @@ class CollaborateurController extends AbstractController
     #[Route('/', name: 'collaborateur_index')]
     public function index(CollaborateurRepository $collaborateurRepository, StatusRepository $statusRepository): Response
     {
+        $user = $this->getUser();
         $status = $statusRepository->find(2); 
-        $collaborateurs = $collaborateurRepository->findAllByStatus($status);
+        if (in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
+            $collaborateurs = $collaborateurRepository->findAllByStatus($status);
+        } else{
+            $collaborateurs = $collaborateurRepository->findAllByRepresentantAndStatus($user->getId() ,$status);
+        }   
 
         return $this->render('collaborateur/index.html.twig', [
             'controller_name' => 'CollaborateurController',
@@ -32,7 +38,7 @@ class CollaborateurController extends AbstractController
     }
 
     #[Route('/new', name: 'new_collaborateur')]
-    public function new(Request $request, EntityManagerInterface $em): Response
+    public function new(Request $request, EntityManagerInterface $em, StatusRepository $statusRepository): Response
     {
         $collaborateur = new Collaborateur();
 
@@ -41,6 +47,10 @@ class CollaborateurController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Ajoutez ici toute logique de traitement nécessaire pour la création d'une affaire
+            
+            // $status = $statusRepository->Find(2);
+
+            // $collaborateur->setStatus($status);
             $em->persist($collaborateur);
             $em->flush();
 
