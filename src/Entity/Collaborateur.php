@@ -2,9 +2,10 @@
 
 namespace App\Entity;
 
-use App\Entity\User;
-use Doctrine\ORM\Mapping as ORM;
 use App\Repository\CollaborateurRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CollaborateurRepository::class)]
 class Collaborateur
@@ -14,29 +15,38 @@ class Collaborateur
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50, nullable: true)]
+    #[ORM\Column(length: 255)]
     private ?string $prenom = null;
 
-    #[ORM\Column(length: 50, nullable: true)]
+    #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column]
     private ?float $hr_jour = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $hr_semaine = null;
+    #[ORM\Column]
+    private ?float $hr_semaine = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column]
     private ?int $jour_semaine = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'collaborateur')]
-    private User $representant ;
+    #[ORM\ManyToOne]
+    private ?Poste $poste = null;
 
-    #[ORM\ManyToOne(targetEntity: Poste::class, inversedBy: 'collaborateur')]
-    private Poste $poste ;
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Status $status = null;
 
-    #[ORM\ManyToOne(targetEntity: Status::class, inversedBy: 'collaborateur')]
-    private Status $status ;
+    #[ORM\ManyToOne]
+    private ?User $representant = null;
+
+    #[ORM\ManyToMany(targetEntity: Affaire::class, mappedBy: 'collaborateur')]
+    private Collection $affaires;
+
+    public function __construct()
+    {
+        $this->affaires = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -48,7 +58,7 @@ class Collaborateur
         return $this->prenom;
     }
 
-    public function setPrenom(?string $prenom): static
+    public function setPrenom(string $prenom): static
     {
         $this->prenom = $prenom;
 
@@ -60,7 +70,7 @@ class Collaborateur
         return $this->nom;
     }
 
-    public function setNom(?string $nom): static
+    public function setNom(string $nom): static
     {
         $this->nom = $nom;
 
@@ -72,19 +82,19 @@ class Collaborateur
         return $this->hr_jour;
     }
 
-    public function setHrJour(?float $hr_jour): static
+    public function setHrJour(float $hr_jour): static
     {
         $this->hr_jour = $hr_jour;
 
         return $this;
     }
 
-    public function getHrSemaine(): ?int
+    public function getHrSemaine(): ?float
     {
         return $this->hr_semaine;
     }
 
-    public function setHrSemaine(?int $hr_semaine): static
+    public function setHrSemaine(float $hr_semaine): static
     {
         $this->hr_semaine = $hr_semaine;
 
@@ -96,21 +106,9 @@ class Collaborateur
         return $this->jour_semaine;
     }
 
-    public function setJourSemaine(?int $jour_semaine): static
+    public function setJourSemaine(int $jour_semaine): static
     {
         $this->jour_semaine = $jour_semaine;
-
-        return $this;
-    }
-
-    public function getRepresentant(): ?User
-    {
-        return $this->representant;
-    }
-
-    public function setRepresentant(?User $representant): static
-    {
-        $this->representant = $representant;
 
         return $this;
     }
@@ -135,6 +133,45 @@ class Collaborateur
     public function setStatus(?Status $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getRepresentant(): ?User
+    {
+        return $this->representant;
+    }
+
+    public function setRepresentant(?User $representant): static
+    {
+        $this->representant = $representant;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Affaire>
+     */
+    public function getAffaires(): Collection
+    {
+        return $this->affaires;
+    }
+
+    public function addAffaire(Affaire $affaire): static
+    {
+        if (!$this->affaires->contains($affaire)) {
+            $this->affaires->add($affaire);
+            $affaire->addCollaborateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAffaire(Affaire $affaire): static
+    {
+        if ($this->affaires->removeElement($affaire)) {
+            $affaire->removeCollaborateur($this);
+        }
 
         return $this;
     }

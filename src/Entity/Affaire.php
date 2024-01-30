@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
-use DateTimeInterface;
+use App\Repository\AffaireRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\AffaireRepository;
 
 #[ORM\Entity(repositoryClass: AffaireRepository::class)]
-#[ORM\Table(name: "affaires")]
 class Affaire
 {
     #[ORM\Id]
@@ -16,31 +16,25 @@ class Affaire
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $fini = null;
-
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $num_affaire = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $client = null;
-
-    #[ORM\ManyToOne(targetEntity: Collaborateur::class, inversedBy: 'affaires')]
-    private Collaborateur $collaborateur ;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $designation = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column]
     private ?float $nbre_heure = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date_debut = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column]
     private ?int $heure_passe = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $date_fin = null;
 
     #[ORM\Column(nullable: true)]
@@ -49,21 +43,17 @@ class Affaire
     #[ORM\Column(nullable: true)]
     private ?int $pourcent_reserve = null;
 
+    #[ORM\ManyToMany(targetEntity: Collaborateur::class, inversedBy: 'affaires')]
+    private Collection $collaborateur;
+
+    public function __construct()
+    {
+        $this->collaborateur = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function isFini(): ?bool
-    {
-        return $this->fini;
-    }
-
-    public function setFini(?bool $fini): static
-    {
-        $this->fini = $fini;
-
-        return $this;
     }
 
     public function getNumAffaire(): ?string
@@ -83,21 +73,9 @@ class Affaire
         return $this->client;
     }
 
-    public function setClient(string $client): static
+    public function setClient(?string $client): static
     {
         $this->client = $client;
-
-        return $this;
-    }
-
-    public function getCollaborateur(): ?Collaborateur
-    {
-        return $this->collaborateur;
-    }
-
-    public function setCollaborateur(?Collaborateur $collaborateur): self
-    {
-        $this->collaborateur = $collaborateur;
 
         return $this;
     }
@@ -119,7 +97,7 @@ class Affaire
         return $this->nbre_heure;
     }
 
-    public function setNbreHeure(?float $nbre_heure): static
+    public function setNbreHeure(float $nbre_heure): static
     {
         $this->nbre_heure = $nbre_heure;
 
@@ -143,14 +121,14 @@ class Affaire
         return $this->heure_passe;
     }
 
-    public function setHeurePasse(?int $heure_passe): static
+    public function setHeurePasse(int $heure_passe): static
     {
         $this->heure_passe = $heure_passe;
 
         return $this;
     }
 
-    public function getDateFin(): ?DateTimeInterface
+    public function getDateFin(): ?\DateTimeInterface
     {
         return $this->date_fin;
     }
@@ -182,6 +160,30 @@ class Affaire
     public function setPourcentReserve(?int $pourcent_reserve): static
     {
         $this->pourcent_reserve = $pourcent_reserve;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Collaborateur>
+     */
+    public function getCollaborateur(): Collection
+    {
+        return $this->collaborateur;
+    }
+
+    public function addCollaborateur(Collaborateur $collaborateur): static
+    {
+        if (!$this->collaborateur->contains($collaborateur)) {
+            $this->collaborateur->add($collaborateur);
+        }
+
+        return $this;
+    }
+
+    public function removeCollaborateur(Collaborateur $collaborateur): static
+    {
+        $this->collaborateur->removeElement($collaborateur);
 
         return $this;
     }

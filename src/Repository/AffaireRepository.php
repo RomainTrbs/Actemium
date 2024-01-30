@@ -21,48 +21,28 @@ class AffaireRepository extends ServiceEntityRepository
         parent::__construct($registry, Affaire::class);
     }
 
-    public function findAllByCollaborateur($id)
-    {
-        return $this->createQueryBuilder('i')
-            ->andWhere('i.collaborateur = :id')
-            ->setParameter('id', $id)
-            ->orderBy('i.id', 'DESC')
-            ->getQuery()
-            ->getResult()
-        ;
-    }
+//    /**
+//     * @return Affaire[] Returns an array of Affaire objects
+//     */
+//    public function findByExampleField($value): array
+//    {
+//        return $this->createQueryBuilder('a')
+//            ->andWhere('a.exampleField = :val')
+//            ->setParameter('val', $value)
+//            ->orderBy('a.id', 'ASC')
+//            ->setMaxResults(10)
+//            ->getQuery()
+//            ->getResult()
+//        ;
+//    }
 
-    public function findAllOnGoingByCollaborateur($userId)
-    {
-        return $this->createQueryBuilder('affaire')
-            ->join('affaire.collaborateur', 'collaborateur')
-            ->where('collaborateur.representant = :userId')
-            ->setParameter('userId', $userId)
-            ->orderBy('collaborateur.nom', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function findAllOnGoingByClient($userId)
-    {
-        return $this->createQueryBuilder('affaire')
-            ->join('affaire.collaborateur', 'collaborateur')
-            ->where('collaborateur.representant = :userId')
-            ->setParameter('userId', $userId)
-            ->orderBy('affaire.client', 'ASC')  // Specify the complete path to the 'client' field
-            ->getQuery()
-            ->getResult();
-    }
-    
-
-    public function findAllByUser($userId)
-    {
-        return $this->createQueryBuilder('affaire')
-            ->join('affaire.collaborateur', 'collaborateur')
-            ->where('collaborateur.representant = :userId')
-            ->setParameter('userId', $userId)
-            ->orderBy('collaborateur.nom', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
+//    public function findOneBySomeField($value): ?Affaire
+//    {
+//        return $this->createQueryBuilder('a')
+//            ->andWhere('a.exampleField = :val')
+//            ->setParameter('val', $value)
+//            ->getQuery()
+//            ->getOneOrNullResult()
+//        ;
+//    }
 }
