@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class InsufficientPermissionsController extends AbstractController
 {
-    #[Route('/insufficient-permissions', name: 'app_insufficient_permissions')]
+    #[Route('/insufficient-permissions', name: 'insufficient_permissions')]
     public function index(): Response
     {
         return $this->render('insufficient_permissions.html.twig', [

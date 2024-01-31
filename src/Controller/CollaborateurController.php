@@ -32,7 +32,7 @@ class CollaborateurController extends AbstractController
     }
 
     #[Route('/new', name: 'new_collaborateur')]
-    public function new(Request $request, EntityManagerInterface $em): Response
+    public function new(Request $request, EntityManagerInterface $em, StatusRepository $statusRepository): Response
     {
         $collaborateur = new Collaborateur();
 
@@ -41,6 +41,10 @@ class CollaborateurController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Ajoutez ici toute logique de traitement nécessaire pour la création d'une affaire
+
+            $status = $statusRepository->find(2); 
+            $collaborateur->setStatus($status);
+
             $em->persist($collaborateur);
             $em->flush();
 
@@ -75,7 +79,7 @@ class CollaborateurController extends AbstractController
     #[Route('/{id}', name: 'show_collaborateur')]
     public function show(Collaborateur $collaborateur, AffaireRepository $affaireRepository): Response
     {
-        $affaires = $affaireRepository->findAllByCollaborateur($collaborateur->getId());
+        $affaires = $collaborateur->getAffaires();
 
         $dateDebut = new DateTime('2024-01-01'); // Date de début
         $dateFin = new DateTime('2024-02-29'); // Date de fin

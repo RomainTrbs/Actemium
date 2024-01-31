@@ -31,8 +31,8 @@ class Affaire
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date_debut = null;
 
-    #[ORM\Column]
-    private ?int $heure_passe = null;
+    #[ORM\Column(nullable: true)]
+    private ?float $heure_passe = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $date_fin = null;
@@ -116,12 +116,12 @@ class Affaire
         return $this;
     }
 
-    public function getHeurePasse(): ?int
+    public function getHeurePasse(): ?float
     {
         return $this->heure_passe;
     }
 
-    public function setHeurePasse(int $heure_passe): static
+    public function setHeurePasse(float $heure_passe): static
     {
         $this->heure_passe = $heure_passe;
 

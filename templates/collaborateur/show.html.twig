@@ -84,7 +84,6 @@
                         <thead class="thead-dark" style="height: 30px;">
                             <tr>
                                 <th class="small-cell" style="height: 128px; font-size: 10px; width: 2px">Numéro d'Affaire</th>
-                                <th class="small-cell" style="height: 128px; font-size: 10px; width: 28px">Collaborateur</th>
                                 <th class="small-cell" style="height: 128px; font-size: 10px; width: 28px">Client</th>
                                 <th class="small-cell" style="height: 128px; font-size: 10px;">Désignation</th>
                                 <th class="small-cell" style="height: 128px; font-size: 10px; width: 20px;">Nbre Heure</th>
@@ -99,7 +98,6 @@
                             {% for affaire in affaires %}
                                 <tr>
                                     <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.NumAffaire }}</td>
-                                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.Collaborateur.nom }} {{ affaire.Collaborateur.prenom }}</td>
                                     <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.Client }}</td>
                                     <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.Designation }}</td>
                                     <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.NbreHeure }}</td>
@@ -138,7 +136,7 @@
                             {% for affaire in affaires %}
                                 {% set fractionnement = 0 %}
                                 {% set FinAffaires = affaire.getDateDebut|date_modify('-1 day') %}
-                                {% set nombreJours = (affaire.NbreHeure) / (affaire.Collaborateur.HrSemaine / affaire.Collaborateur.JourSemaine) %}
+                                {% set nombreJours = (affaire.NbreHeure) / (collaborateur.HrSemaine / collaborateur.JourSemaine) %}
                                 {% set nombreJours = nombreJours|round(0, 'ceil') %}
                                 {% set FinAffaires = FinAffaires|date_modify('+' ~ nombreJours ~ ' days') %}
                                 <tr>
@@ -159,15 +157,6 @@
                                                 {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
                                                     {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
                                                 {% endif %}
-                                            {% endif %}
-                                        {% elseif affaire.getDateFin is not null %} 
-                                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and affaire.getDateFin()|date('m/d') >= date.dateFormatee %}
-                                                <td class="small-cell" style="height: 42px; background-color: #00ffff;"></td>
-                                            {% elseif FinAffaires|date('m/d') < date.dateFormatee and affaire.NbreJourFractionnement > fractionnement  %}
-                                                {% set fractionnement = fractionnement + 1 %}
-                                                <td class="small-cell" style="height: 42px; background-color: #c0c0c0;"></td>
-                                            {% else %}
-                                                <td class="small-cell" style="height: 42px;"></td>
                                             {% endif %}
                                         {% elseif affaire.getDateFin is null %}
                                             {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}

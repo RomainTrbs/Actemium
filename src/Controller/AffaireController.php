@@ -50,7 +50,7 @@ class AffaireController extends AbstractController
         ->add('firstDate', DateType::class)
         ->add('lastDate', DateType::class)
         ->add('validate', SubmitType::class, [
-            'label' => 'Validate',
+            'label' => 'Valider',
         ])
         ->getForm();
 
@@ -199,7 +199,7 @@ class AffaireController extends AbstractController
         $userId = $user->getId();
         
         // Récupérer le collaborateur en charge de l'affaire
-        $collaborateur = $affaire->getCollaborateur();
+        $collaborateur = $affaire->getCollaborateur()[0];
 
         // Récupérer le représentant associé au collaborateur
         $representant = $collaborateur->getRepresentant();

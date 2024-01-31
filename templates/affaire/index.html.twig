@@ -70,12 +70,17 @@
                 <th class="small-cell" style="height: 128px; font-size: 10px; width: 23px">%Temps Réserve</th>                        
             </tr>
         </thead>
-        <tbody style="height: 42px;">        
-            {% for affaire in affaires %}
-                {% if collaborateur_precedent is defined %}
-                                    {# {{ affaire.Collaborateur.nom }}
-                    {{ collaborateur_precedent.nom }} #}
-                    {% if filter == 'collaborateur' and affaire.Collaborateur.nom != collaborateur_precedent.nom %}                    
+        <tbody style="height: 42px;">
+        {% set collaborateur_precedent = null %}
+            {% for affaire in affaires %}            
+            {% for collaborateur in affaire.collaborateur %}
+            {% if collaborateur_precedent is not null %}
+                            {{ collaborateur_precedent.id }}
+            {% endif %}
+                {{ collaborateur.id }}
+                {% if collaborateur_precedent is not null and collaborateur != collaborateur_precedent %}
+                                    {# {{ collaborateur.nom }}
+                    {{ collaborateur_precedent.nom }} #}                   
                     <tr>
                         <td class="small-cell" style="background-color:#ffff00;"></td>
                         <td class="small-cell" style="background-color:#ffff00;"></td>
@@ -89,10 +94,9 @@
                         <td class="small-cell" style="background-color:#ffff00;"></td>                
                     </tr>
                     {% endif %}
-                {% endif %}
                 <tr>
                     <td class="small-cell" style="font-size: 10px; height: 42px;"><a href="/edit/{{ affaire.id }}">{{ affaire.NumAffaire }}</a></td>
-                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.Collaborateur.nom }} {{ affaire.Collaborateur.prenom }}</td>
+                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ collaborateur.nom }} {{ collaborateur.prenom }}</td>
                     <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.Client }}</td>
                     <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.Designation }}</td>
                     <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.NbreHeure }}</td>
@@ -109,7 +113,9 @@
 
                     {# Répéter ces cellules vides pour chaque jour #}
                 </tr>
-                {% set collaborateur_precedent = affaire.collaborateur %}
+                {% set collaborateur_precedent = collaborateur %}
+            {% endfor %}
+            {{ collaborateur_precedent.id }}
             {% endfor %}
         </tbody>
     </table>
@@ -134,9 +140,10 @@
     </thead>
     <tbody>
     {% for affaire in affaires %}
+    {% for collaborateur in affaire.collaborateur %}
     {% set fractionnement = 0 %}
         {% set FinAffaires = affaire.getDateDebut|date_modify('-1 day') %}
-            {% set nombreJours = (affaire.NbreHeure) / (affaire.Collaborateur.HrSemaine / affaire.Collaborateur.JourSemaine) %}
+            {% set nombreJours = (affaire.NbreHeure) / (collaborateur.HrSemaine / collaborateur.JourSemaine) %}
             {% set nombreJours = nombreJours|round(0, 'ceil') %}
             {% set FinAffaires = FinAffaires|date_modify('+' ~ nombreJours ~ ' days') %}
             {% if collaborateur_precedent is defined %}
@@ -170,17 +177,7 @@
                         {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
                     {% endif %}
                 {% endif %}  
-
-            {% elseif affaire.getDateFin is not null %} 
-                {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and affaire.getDateFin()|date('m/d') >= date.dateFormatee %}
-                    <td class="small-cell" style="height: 42px; background-color: #00ffff;"></td>
-                {% elseif FinAffaires|date('m/d') < date.dateFormatee and affaire.NbreJourFractionnement > fractionnement  %}
-                {% set fractionnement = fractionnement + 1 %}
-                    <td class="small-cell" style="height: 42px; background-color: #c0c0c0;"></td>
-                {% else %}
-                    <td class="small-cell" style="height: 42px;"></td>
-                {% endif %}
-
+                
             {% elseif affaire.getDateFin is null %}
                 {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
                     <td class="small-cell" style="height: 42px; background-color: #00ffff;"></td>
@@ -194,7 +191,8 @@
             {% endif %}
         {% endfor %}
         </tr>  
-            {% set collaborateur_precedent = affaire.collaborateur %}      
+            {% set collaborateur_precedent = collaborateur %}  
+        {% endfor %}    
     {% endfor %}
     </tbody>
     </table>

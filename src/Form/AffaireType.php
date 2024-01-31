@@ -25,11 +25,14 @@ class AffaireType extends AbstractType
                 'required' => true
             ])
             ->add('collaborateur', EntityType::class, [
+                'multiple' => true,
                 'class' => Collaborateur::class,
                 'query_builder' => function (CollaborateurRepository $cr) use ($userId) {
                     return $cr->createQueryBuilder('c')
                         ->andWhere('c.representant = :representantId')
                         ->setParameter('representantId', $userId)
+                        ->andWhere('c.status = :statusId')  // Affiche uniquement les collaborateurs avec le statut "collaborateur"
+                        ->setParameter('statusId', 2) // Changez 'collaborateur' par la valeur réelle pour le statut collaborateur
                         ->orderBy('c.nom', 'ASC');
                 },
                 'choice_label' => function ($collaborateur) {
@@ -42,7 +45,9 @@ class AffaireType extends AbstractType
                 'widget' => 'single_text',
                 'required' => true,
             ])
-            ->add('heure_passe')
+            ->add('heure_passe', null, [
+                'required' => false,
+            ])           
             ->add('date_fin', DateType::class, [
                 'widget' => 'single_text',
                 'required' => false,

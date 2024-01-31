@@ -21,13 +21,13 @@ class Collaborateur
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?float $hr_jour = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?float $hr_semaine = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $jour_semaine = null;
 
     #[ORM\ManyToOne]

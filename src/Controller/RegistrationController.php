@@ -62,11 +62,14 @@ class RegistrationController extends AbstractController
                 )
             );
 
+            $roles = ['ROLE_USER'];
+            $user->setRoles($roles);
+
             $entityManager->persist($user);
             $entityManager->flush();
             // do anything else you need here, like send an email
 
-            return $this->redirectToRoute('affaire_index');
+            return $this->redirectToRoute('app_user');
         }
 
         return $this->render('registration/new.html.twig', [
@@ -113,6 +116,9 @@ class RegistrationController extends AbstractController
                 )
             );
 
+            $roles = ['ROLE_ADMIN'];
+            $user->setRoles($roles);
+
             $entityManager = $doctrine->getManager();
             $entityManager->persist($user);
             $entityManager->flush();
@@ -127,13 +133,10 @@ class RegistrationController extends AbstractController
             $entityManager->flush();
 
 
-            return $this->redirectToRoute('affaire_index');
+            return $this->redirectToRoute('app_user');
         }
 
         // Effectuez une requête pour récupérer le dernier utilisateur créé
-
-
-
 
         return $this->render('registration/new_admin.html.twig', [
             'registrationForm' => $form->createView(),

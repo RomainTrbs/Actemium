@@ -2,8 +2,9 @@
 
 namespace App\DataFixtures;
 
-use Doctrine\Bundle\FixturesBundle\Fixture;
+use App\Entity\User;
 use Doctrine\Persistence\ObjectManager;
+use Doctrine\Bundle\FixturesBundle\Fixture;
 
 class AppFixtures extends Fixture
 {
@@ -13,7 +14,7 @@ class AppFixtures extends Fixture
         // $manager->persist($product);
         $user = new User();
         $user->setUsername('christophe.cazeaux@actemium.com');
-        $user->setRoles("['ROLE_SUPER_ADMIN']");
+        $user->setRoles(["ROLE_SUPER_ADMIN"]);
 
         $encodedPassword = $this->passwordEncoder->encodePassword($user, 'christophe');
         $user->setPassword($encodedPassword);
