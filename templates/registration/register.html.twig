@@ -35,6 +35,7 @@
                 <div class="form-group">
                     {{ form_row(registrationForm.username, {'label': "Nom d'utilisateur", 'attr': {'class': 'form-control mb-3'}}) }}
                 </div>
+                    {{ form_errors(registrationForm.username) }}
                 
                 <div class="form-group">
                     {{ form_row(registrationForm.plainPassword.first, {'label': 'Mot de passe', 'attr': {'class': 'form-control mb-3'}}) }}

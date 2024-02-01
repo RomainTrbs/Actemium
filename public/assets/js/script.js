@@ -14,3 +14,13 @@ $(document).ready(function() {
        "order": [[0, 'asc']] // Set initial sorting column (change 0 to the index of your desired column)
     });
  });
+ // Ajoutez ce script dans votre template ou fichier JavaScript
+$(document).ready(function() {
+    $('input[name="form2[type]"]').change(function() {
+        if ($(this).val() === 'collaborateur_specific') {
+            $('select[name="form2[value]"]').show();
+        } else {
+            $('select[name="form2[value]"]').hide();
+        }
+    });
+});

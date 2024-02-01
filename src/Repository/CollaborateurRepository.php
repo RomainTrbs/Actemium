@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Status;
 use App\Entity\Collaborateur;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
@@ -39,6 +40,29 @@ class CollaborateurRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findAllWithAffaires($userId)
+    {
+        return $this->createQueryBuilder('c')
+            ->leftJoin('c.affaires', 'ac')  // Assurez-vous de remplacer 'affaires' par le nom réel de la relation dans votre entité Collaborator
+            ->andWhere('ac.id IS NOT NULL')  // Vérifiez si la clé primaire de l'affaire n'est pas nulle pour garantir qu'il y a au moins une affaire associée
+            ->andWhere('c.representant = :userId')  // Ajoutez la condition pour vérifier l'ID du représentant du collaborateur
+            ->setParameter('userId', $userId)
+            ->orderBy('c.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findAllInArray(array $collaboratorIds)
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.id IN (:collaboratorIds)')
+            ->setParameter('collaboratorIds', $collaboratorIds)            
+            ->orderBy('c.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+    
 
 //    /**
 //     * @return Collaborateur[] Returns an array of Collaborateur objects

@@ -19,8 +19,13 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Doctrine\Persistence\ManagerRegistry as PersistenceManagerRegistry;
 
@@ -28,67 +33,105 @@ use Doctrine\Persistence\ManagerRegistry as PersistenceManagerRegistry;
 class AffaireController extends AbstractController
 {
     #[Route('/', name: 'affaire_index')]
-    public function index(AffaireRepository $affaireRepository, UserRepository $userRepository, CollaborateurRepository $collaborateurRepository, Security $security, Request $request): Response
-    {
-    
+    public function index(AffaireRepository $affaireRepository, UserRepository $userRepository,
+     CollaborateurRepository $collaborateurRepository, Security $security, Request $request, EntityManagerInterface $entityManager): Response
+    {   
         $user = $this->getUser();
-        $user = $user->getCollaborateur();
-        $user = $user->getRepresentant();
+        $userId = $user->getId();
+        $collaborateurs = $collaborateurRepository->findAllWithAffaires($user->getId());
+        
         $affaires = $affaireRepository->findAllByUser($user->getId());
-
-        $filter = 'collaborateur';
 
         $session = $request->getSession();
         $session->start();
 
-    // Retrieve stored dates from the session or use default values
-    $firstDate = $session->get('firstDate', new \DateTime('01-01-2024'));
-    $lastDate = $session->get('lastDate', new \DateTime('31-12-2024'));
+        // Retrieve stored dates from the session or use default values
+        $firstDate = $session->get('firstDate', new \DateTime('01-01-2024'));
+        $lastDate = $session->get('lastDate', new \DateTime('31-12-2024'));
 
-    // Create the form with the stored values
-    $form = $this->createFormBuilder(['firstDate' => $firstDate, 'lastDate' => $lastDate])
-        ->add('firstDate', DateType::class)
-        ->add('lastDate', DateType::class)
-        ->add('validate', SubmitType::class, [
-            'label' => 'Valider',
+        $value = $session->get('collaborateur', []);
+
+        $form2 = $this->createFormBuilder()
+        ->add('collaborateur', EntityType::class, [
+            'multiple' => true,
+            'required' => false,
+            'class' => Collaborateur::class,
+            'query_builder' => function (CollaborateurRepository $cr) use ($userId) {
+                return $cr->createQueryBuilder('c')
+                    ->andWhere('c.representant = :representantId')
+                    ->setParameter('representantId', $userId)
+                    ->andWhere('c.status = :statusId')
+                    ->setParameter('statusId', 2)
+                    ->orderBy('c.nom', 'ASC');
+            },
+            'choice_label' => function ($collaborateur) {
+                return $collaborateur->getNom() . ' ' . $collaborateur->getPrenom();
+            }
         ])
+        ->add('selectAll', CheckboxType::class, [
+            'mapped' => false, // Cette case à cocher n'est pas liée à une propriété de l'entité
+            'label' => 'Sélectionner tous les collaborateurs',
+            'required' => false, // L'utilisateur n'est pas obligé de la cocher
+            'attr' => ['class' => 'select-all-checkbox'],
+        ])
+        ->add('validate', SubmitType::class, ['label' => 'Valider', 'attr' => ['class' => 'btn btn-primary']])
         ->getForm();
 
-    $form->handleRequest($request);
+        $form2->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        if ($form->get('validate')->isClicked()) {
-            // The "Validate" button was clicked
-            $data = $form->getData();
+        if ($form2->isSubmitted() && $form2->isValid()) {
+            if ($form2->get('validate')->isClicked()) {
+                $data = $form2->getData();
+                $collaborateurChoisi = $data['collaborateur'];
 
-            $firstDate = $data['firstDate'];
-            $lastDate = $data['lastDate'];
+                if ($form2->get('selectAll')->getData() === true) {
+                    $collaborateurs = $form2->get('collaborateur')->getConfig()->getOption('choices');
+                    $collaborateurChoisi = is_array($collaborateurs) ? array_keys($collaborateurs) : [];
+                }
+                // Store the filter and collaborator values in the session
+                $session->set('collaborateur', $collaborateurChoisi);
 
-            // Store the dates in the session
-            $session->set('firstDate', $firstDate);
-            $session->set('lastDate', $lastDate);
-
-            // Redirect the user to the same route with parameters dd and df
-            return $this->redirectToRoute('affaire_index');
+                // Redirect the user to the same route with the parameters
+                return $this->redirectToRoute('affaire_index');
+            }       
         }
-
-        // Handle other form submission logic here
-    }
-
-        if ($request->query->has('filter')) {
-
-            $filter = $request->query->get('filter');
-            
-            switch ($filter) {
-                case 'collaborateur':
-                    $affaires = $affaireRepository->findAllOngoingByCollaborateur($user->getId());
-                    $filter = 'collaborateur';
-                    break;
-                case 'client':
-                    $affaires = $affaireRepository->findAllOngoingByClient($user->getId());
-                    $filter = 'client';
-                    break;
+        if(($session->get('collaborateur')) != null ){
+            $collaborateurGroupe = [];
+            foreach($session->get('collaborateur') as $collaborateur){
+                array_push($collaborateurGroupe, $collaborateur->getId());                              
             }
+            $collaborateursChoisi = $collaborateurRepository->findAllInArray($collaborateurGroupe);
+        }
+        
+
+        // Create the form with the stored values
+        $form = $this->createFormBuilder(['firstDate' => $firstDate, 'lastDate' => $lastDate])
+            ->add('firstDate', DateType::class)
+            ->add('lastDate', DateType::class)
+            ->add('validate', SubmitType::class, [
+                'label' => 'Valider',
+            ])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($form->get('validate')->isClicked()) {
+                // The "Validate" button was clicked
+                $data = $form->getData();
+
+                $firstDate = $data['firstDate'];
+                $lastDate = $data['lastDate'];
+
+                // Store the dates in the session
+                $session->set('firstDate', $firstDate);
+                $session->set('lastDate', $lastDate);
+
+                // Redirect the user to the same route with parameters dd and df
+                return $this->redirectToRoute('affaire_index');
+            }
+
+            // Handle other form submission logic here
         }
 
         // Check if the user is logged in
@@ -99,7 +142,7 @@ class AffaireController extends AbstractController
         // // Retrieve affaires related to the user
         // $affaires = $affaireRepository->findAllByUser($user->getId());
 
-        
+    
         $affairesAll = $affaireRepository->findAll();
 
         if (isset($firstDate)) {
@@ -144,8 +187,9 @@ class AffaireController extends AbstractController
             'tableauDates' => $tableauDates,
             'ferie' => $ferie,
             'weekend' => $weekend,
-            'filter' => $filter,
+            'collaborateurs' => isset($collaborateursChoisi) ? $collaborateursChoisi : $collaborateurs,
             'form' => $form->createView(),
+            'form2' => $form2->createView(),
         ]);
     }
 

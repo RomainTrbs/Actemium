@@ -10,7 +10,6 @@
             vertical-align: middle !important;
             font-size: 0.8rem; /* Taille de police plus petite */
         }
-
         .small-cell {
             max-width: 11px; /* Largeur maximale pour les cellules */
             overflow: hidden;
@@ -31,23 +30,47 @@
     'Sunday': 'Dim'
 } %}
 
-<h2 align="center">Tableau des Affaires</h2>
+<h2 align="center">Tableau des Affaires</h2><hr>
 <div class="row">
-    <div class="col-9"><!-- Content on the left --></div>
+    <div class="col-3">
+        <div class="card">
+            <div class="card-body" style="height: 300px;">
+                <div class="form-container">
+                    {{ form_start(form2) }}
+                    <div class="form-group">
+                        {{ form_row(form2.collaborateur, {'attr': {'class': 'form-control'}, 'label': false }) }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-check-label" for="{{ form2.selectAll.vars.id }}" style="margin: 0; padding-right: 30px;">Tous les collaborateurs</label>
+                        {{ form_widget(form2.selectAll, {'attr': {'class': 'form-check-input', 'style': 'transform: scale(1.5);'}, 'label': false}) }}
+                    </div>
+                    <div class="form-group">
+                        {{ form_row(form2.validate) }}
+                    </div>
+                    {{ form_end(form2) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6"></div>
     
     <div class="col-3">
-        <div class="form-container">
-            {{ form_start(form) }}
-            <div class="form-group">
-                {{ form_row(form.firstDate, {'attr': {'class': 'form-control'}, 'label': false}) }}
+        <div class="card">
+            <div class="card-body" style="height: 300px;">
+                <div class="form-container">
+                    {{ form_start(form) }}
+                    <div class="form-group">
+                        {{ form_row(form.firstDate, {'attr': {'class': 'form-control'}, 'label': false}) }}
+                    </div>
+                    <div class="form-group">
+                        {{ form_row(form.lastDate, {'attr': {'class': 'form-control'}, 'label': false}) }}
+                    </div>
+                    <div class="form-group">
+                        {{ form_row(form.validate, {'attr': {'class': 'btn btn-primary'}}) }}
+                    </div>
+                    {{ form_end(form) }}
+                </div>
             </div>
-            <div class="form-group">
-                {{ form_row(form.lastDate, {'attr': {'class': 'form-control'}, 'label': false}) }}
-            </div>
-            <div class="form-group">
-                {{ form_row(form.validate) }}
-            </div>
-            {{ form_end(form) }}
         </div>
     </div>
 </div>
@@ -71,29 +94,10 @@
             </tr>
         </thead>
         <tbody style="height: 42px;">
-        {% set collaborateur_precedent = null %}
-            {% for affaire in affaires %}            
-            {% for collaborateur in affaire.collaborateur %}
-            {% if collaborateur_precedent is not null %}
-                            {{ collaborateur_precedent.id }}
-            {% endif %}
-                {{ collaborateur.id }}
-                {% if collaborateur_precedent is not null and collaborateur != collaborateur_precedent %}
+        {% for collaborateur in collaborateurs %}
+            {% for affaire in collaborateur.affaires %}
                                     {# {{ collaborateur.nom }}
                     {{ collaborateur_precedent.nom }} #}                   
-                    <tr>
-                        <td class="small-cell" style="background-color:#ffff00;"></td>
-                        <td class="small-cell" style="background-color:#ffff00;"></td>
-                        <td class="small-cell" style="background-color:#ffff00;"></td>
-                        <td class="small-cell" style="background-color:#ffff00;"></td>
-                        <td class="small-cell" style="background-color:#ffff00;"></td>
-                        <td class="small-cell" style="background-color:#ffff00;"></td>
-                        <td class="small-cell" style="background-color:#ffff00;"></td>
-                        <td class="small-cell" style="background-color:#ffff00;"></td>
-                        <td class="small-cell" style="background-color:#ffff00;"></td>
-                        <td class="small-cell" style="background-color:#ffff00;"></td>                
-                    </tr>
-                    {% endif %}
                 <tr>
                     <td class="small-cell" style="font-size: 10px; height: 42px;"><a href="/edit/{{ affaire.id }}">{{ affaire.NumAffaire }}</a></td>
                     <td class="small-cell" style="font-size: 10px; height: 42px;">{{ collaborateur.nom }} {{ collaborateur.prenom }}</td>
@@ -113,10 +117,22 @@
 
                     {# Répéter ces cellules vides pour chaque jour #}
                 </tr>
-                {% set collaborateur_precedent = collaborateur %}
             {% endfor %}
-            {{ collaborateur_precedent.id }}
-            {% endfor %}
+            {% if not loop.last %}
+            <tr>
+                <td class="small-cell" style="background-color:#ffff00;"></td>
+                <td class="small-cell" style="background-color:#ffff00;"></td>
+                <td class="small-cell" style="background-color:#ffff00;"></td>
+                <td class="small-cell" style="background-color:#ffff00;"></td>
+                <td class="small-cell" style="background-color:#ffff00;"></td>
+                <td class="small-cell" style="background-color:#ffff00;"></td>
+                <td class="small-cell" style="background-color:#ffff00;"></td>
+                <td class="small-cell" style="background-color:#ffff00;"></td>
+                <td class="small-cell" style="background-color:#ffff00;"></td>
+                <td class="small-cell" style="background-color:#ffff00;"></td>                
+            </tr>
+            {% endif %}
+        {% endfor %}
         </tbody>
     </table>
 </div>
@@ -139,60 +155,59 @@
     {% endfor %}
     </thead>
     <tbody>
-    {% for affaire in affaires %}
-    {% for collaborateur in affaire.collaborateur %}
-    {% set fractionnement = 0 %}
-        {% set FinAffaires = affaire.getDateDebut|date_modify('-1 day') %}
+    {% for collaborateur in collaborateurs %}
+        {% for affaire in collaborateur.affaires %}
+            {% set fractionnement = 0 %}
+            {% set FinAffaires = affaire.getDateDebut|date_modify('-1 day') %}
             {% set nombreJours = (affaire.NbreHeure) / (collaborateur.HrSemaine / collaborateur.JourSemaine) %}
             {% set nombreJours = nombreJours|round(0, 'ceil') %}
             {% set FinAffaires = FinAffaires|date_modify('+' ~ nombreJours ~ ' days') %}
-            {% if collaborateur_precedent is defined %}
-                {% if filter == 'collaborateur' and affaire.collaborateur != collaborateur_precedent %}
-                <tr>
+                    
+            <tr>
                 {% for date in tableauDates %}
-                    <td class="small-cell" style="background-color:#ffff00;"></td>
-                {% endfor %}           
-                </tr>
-                {% endif %}
-            {% endif %} 
-    <tr>
-        {% for date in tableauDates %}
-            {% if date.jourSemaine in weekend or date.dateFormatee in ferie %}
+                    {% if date.jourSemaine in weekend or date.dateFormatee in ferie %}
+                    
+                        {% if joursSemaines[date.jourSemaine] == "Sam" %}
+                            <td class="small-cell" style="height: 10px; font-size:9px;">Sam</td>
+                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
+                            {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
+                            {% endif %}
+
+                        {% elseif joursSemaines[date.jourSemaine] == "Dim" %}
+                            <td class="small-cell" style="height: 10px; font-size:9px;">Dim</td>
+                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
+                                {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
+                            {% endif %}
+
+                        {% else %}
+                            <td class="small-cell" style="height: 10px; font-size:9px;">F</td>
+                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
+                                {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
+                            {% endif %}
+                        {% endif %}  
+                        
+                    {% elseif affaire.getDateFin is null %}
+                        {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
+                            <td class="small-cell" style="height: 42px; background-color: #00ffff;"></td>
+                        {% elseif FinAffaires|date('m/d') < date.dateFormatee and affaire.NbreJourFractionnement > fractionnement  %}
+                        {% set fractionnement = fractionnement + 1 %}
+                            <td class="small-cell" style="height: 42px; background-color: #c0c0c0;"></td>
+                        {% else %}
+                            <td class="small-cell" style="height: 42px;"></td>
+                        {% endif %}
+
+                    {% endif %}
+                {% endfor %}
+                </tr>  
             
-                {% if joursSemaines[date.jourSemaine] == "Sam" %}
-                    <td class="small-cell" style="height: 10px; font-size:9px;">Sam</td>
-                    {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
-                       {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
-                    {% endif %}
-
-                {% elseif joursSemaines[date.jourSemaine] == "Dim" %}
-                    <td class="small-cell" style="height: 10px; font-size:9px;">Dim</td>
-                    {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
-                        {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
-                    {% endif %}
-
-                {% else %}
-                    <td class="small-cell" style="height: 10px; font-size:9px;">F</td>
-                    {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
-                        {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
-                    {% endif %}
-                {% endif %}  
-                
-            {% elseif affaire.getDateFin is null %}
-                {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
-                    <td class="small-cell" style="height: 42px; background-color: #00ffff;"></td>
-                {% elseif FinAffaires|date('m/d') < date.dateFormatee and affaire.NbreJourFractionnement > fractionnement  %}
-                {% set fractionnement = fractionnement + 1 %}
-                    <td class="small-cell" style="height: 42px; background-color: #c0c0c0;"></td>
-                {% else %}
-                    <td class="small-cell" style="height: 42px;"></td>
-                {% endif %}
-
-            {% endif %}
-        {% endfor %}
-        </tr>  
-            {% set collaborateur_precedent = collaborateur %}  
-        {% endfor %}    
+        {% endfor %}   
+        {% if not loop.last %}
+            <tr>
+            {% for date in tableauDates %}
+                <td class="small-cell" style="background-color:#ffff00;"></td>
+            {% endfor %}              
+            </tr>
+        {% endif %} 
     {% endfor %}
     </tbody>
     </table>
