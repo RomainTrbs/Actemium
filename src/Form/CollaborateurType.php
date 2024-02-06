@@ -12,6 +12,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\ColorType;
 
 class CollaborateurType extends AbstractType
 {
@@ -23,6 +24,11 @@ class CollaborateurType extends AbstractType
         ->add('hr_jour')
         ->add('hr_semaine')
         ->add('jour_semaine')
+        ->add('couleur', ColorType::class, [
+            'label' => 'Choisir une couleur',
+            'data' => '#FFFFFF'
+            // Vous pouvez ajouter d'autres options ici si nécessaire
+        ])
         ->add('representant', EntityType::class, [
             'class' => User::class,
             'query_builder' => function (UserRepository $cr) {

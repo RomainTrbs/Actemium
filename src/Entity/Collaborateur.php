@@ -43,6 +43,9 @@ class Collaborateur
     #[ORM\ManyToMany(targetEntity: Affaire::class, mappedBy: 'collaborateur')]
     private Collection $affaires;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $couleur = null;
+
     public function __construct()
     {
         $this->affaires = new ArrayCollection();
@@ -172,6 +175,18 @@ class Collaborateur
         if ($this->affaires->removeElement($affaire)) {
             $affaire->removeCollaborateur($this);
         }
+
+        return $this;
+    }
+
+    public function getCouleur(): ?string
+    {
+        return $this->couleur;
+    }
+
+    public function setCouleur(?string $couleur): static
+    {
+        $this->couleur = $couleur;
 
         return $this;
     }

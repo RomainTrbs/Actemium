@@ -36,18 +36,24 @@ class AffaireController extends AbstractController
     public function index(AffaireRepository $affaireRepository, UserRepository $userRepository,
      CollaborateurRepository $collaborateurRepository, Security $security, Request $request, EntityManagerInterface $entityManager): Response
     {   
-        $user = $this->getUser();
+        $user = $this->getUser();        
         $userId = $user->getId();
-        $collaborateurs = $collaborateurRepository->findAllWithAffaires($user->getId());
         
+        $role = $user->getRoles();
+        if(in_array('ROLE_SUPER_ADMIN', $user->getRoles())){
+            $collaborateurs = $collaborateurRepository->findAllWithAffairesOnly();
+        }else{
+            $collaborateurs = $collaborateurRepository->findAllWithAffaires($user->getId());
+        }
         $affaires = $affaireRepository->findAllByUser($user->getId());
-
         $session = $request->getSession();
         $session->start();
+        $d2 = new DateTime ;
+        $d2->modify('+365 days');
 
         // Retrieve stored dates from the session or use default values
-        $firstDate = $session->get('firstDate', new \DateTime('01-01-2024'));
-        $lastDate = $session->get('lastDate', new \DateTime('31-12-2024'));
+        $firstDate = $session->get('firstDate', new DateTime);
+        $lastDate = $session->get('lastDate', $d2);
 
         $value = $session->get('collaborateur', []);
 
@@ -190,6 +196,7 @@ class AffaireController extends AbstractController
             'collaborateurs' => isset($collaborateursChoisi) ? $collaborateursChoisi : $collaborateurs,
             'form' => $form->createView(),
             'form2' => $form2->createView(),
+            'role' => $role,
         ]);
     }
 

@@ -12,10 +12,9 @@
         <div class='text-center mb-4'>	
             <h2 class='font-weight-bold'>Liste des Collaborateurs</h2>
         </div>
-        <div class='text-center mb-4'>	
-            <a href='{{ path('new_collaborateur') }}'>
-                <button class='btn btn-secondary btn-lg'>Ajouter un collaborateur</button>
-            </a>
+        <div class="text-center mb-4"> 
+            <a href="{{ path('new_collaborateur') }}"><button class="btn btn-secondary">Ajouter un collaborateur</button></a>
+            <a href="{{ path('poste_index') }}"><button class="btn btn-primary">Liste poste</button></a>
         </div>
 
         <hr>

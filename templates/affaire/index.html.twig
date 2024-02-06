@@ -69,6 +69,9 @@
                         {{ form_row(form.validate, {'attr': {'class': 'btn btn-primary'}}) }}
                     </div>
                     {{ form_end(form) }}
+                    <div class="form-group">
+                        <a class="btn btn-success py-2 px-4 mt-3" href="{{ path('app_excel') }}">Convertir en tableau Excel</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -77,7 +80,6 @@
 <hr>
 <div class="row">
 <div class="col-5 table-responsive" style="vertical-align: top;">
-    
     <table id="sortableTable" class="table table-bordered table-sm">
         <thead class="thead-dark" style="height: 30px;" >
             <tr>
@@ -85,11 +87,11 @@
                 <th class="small-cell" style="height: 128px; font-size: 10px; width: 28px">Collaborateur</th>
                 <th class="small-cell" style="height: 128px; font-size: 10px; width: 28px">Client</th>
                 <th class="small-cell" style="height: 128px; font-size: 10px; width: ;">Désignation</th>
-                <th class="small-cell" style="height: 128px; font-size: 10px; width: 20px;">Nbre Heure</th>
+                <th class="small-cell" style="height: 128px; font-size: 10px; width: 20px;">Nbre(s) Heure(s)</th>
                 <th class="small-cell" style="height: 128px; font-size: 10px; width: 23px">Date de Début ou Mise à Jour</th>
-                <th class="small-cell" style="height: 128px; font-size: 10px; width: 15px;">Heure Passé</th>
+                <th class="small-cell" style="height: 128px; font-size: 10px; width: 15px;">Heure(s) Passée(s)</th>
                 <th class="small-cell" style="height: 128px; font-size: 10px; width: 23px">Date Fin Impératif</th>    
-                <th class="small-cell" style="height: 128px; font-size: 10px; width: 23px">Nombre de jour de fractionnement</th>    
+                <th class="small-cell" style="height: 128px; font-size: 10px; width: 23px">Nombre(s) de jour(s) de fractionnement</th>    
                 <th class="small-cell" style="height: 128px; font-size: 10px; width: 23px">%Temps Réserve</th>                        
             </tr>
         </thead>
@@ -100,7 +102,7 @@
                     {{ collaborateur_precedent.nom }} #}                   
                 <tr>
                     <td class="small-cell" style="font-size: 10px; height: 42px;"><a href="/edit/{{ affaire.id }}">{{ affaire.NumAffaire }}</a></td>
-                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ collaborateur.nom }} {{ collaborateur.prenom }}</td>
+                    <td class="small-cell" style="font-size: 10px; height: 42px; background-color:{{ collaborateur.couleur }}">{{ collaborateur.nom }} {{ collaborateur.prenom }}</td>
                     <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.Client }}</td>
                     <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.Designation }}</td>
                     <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.NbreHeure }}</td>
@@ -169,25 +171,25 @@
                     
                         {% if joursSemaines[date.jourSemaine] == "Sam" %}
                             <td class="small-cell" style="height: 10px; font-size:9px;">Sam</td>
-                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
+                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee and affaire.getDateDebut()|date('Y') == date.annee %}
                             {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
                             {% endif %}
 
                         {% elseif joursSemaines[date.jourSemaine] == "Dim" %}
                             <td class="small-cell" style="height: 10px; font-size:9px;">Dim</td>
-                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
+                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee and affaire.getDateDebut()|date('Y') == date.annee %}
                                 {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
                             {% endif %}
 
                         {% else %}
                             <td class="small-cell" style="height: 10px; font-size:9px;">F</td>
-                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
+                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee and affaire.getDateDebut()|date('Y') == date.annee %}
                                 {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
                             {% endif %}
                         {% endif %}  
                         
-                    {% elseif affaire.getDateFin is null %}
-                        {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
+                    {% else %}
+                        {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee and affaire.getDateDebut()|date('Y') == date.annee %}
                             <td class="small-cell" style="height: 42px; background-color: #00ffff;"></td>
                         {% elseif FinAffaires|date('m/d') < date.dateFormatee and affaire.NbreJourFractionnement > fractionnement  %}
                         {% set fractionnement = fractionnement + 1 %}

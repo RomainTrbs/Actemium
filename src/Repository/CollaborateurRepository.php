@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Poste;
 use App\Entity\Status;
 use App\Entity\Collaborateur;
 use Doctrine\Persistence\ManagerRegistry;
@@ -40,6 +41,16 @@ class CollaborateurRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    
+    public function findAllByPoste(Poste $poste)
+    {
+        return $this->createQueryBuilder('u')
+            ->join('u.poste', 'p') // Assurez-vous que le champ dans votre entité User pointe vers le bon champ de poste
+            ->andWhere('p = :poste')
+            ->setParameter('poste', $poste)
+            ->getQuery()
+            ->getResult();
+    }
 
     public function findAllWithAffaires($userId)
     {
@@ -48,6 +59,16 @@ class CollaborateurRepository extends ServiceEntityRepository
             ->andWhere('ac.id IS NOT NULL')  // Vérifiez si la clé primaire de l'affaire n'est pas nulle pour garantir qu'il y a au moins une affaire associée
             ->andWhere('c.representant = :userId')  // Ajoutez la condition pour vérifier l'ID du représentant du collaborateur
             ->setParameter('userId', $userId)
+            ->orderBy('c.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findAllWithAffairesOnly()
+    {
+        return $this->createQueryBuilder('c')
+            ->leftJoin('c.affaires', 'ac')  // Assurez-vous de remplacer 'affaires' par le nom réel de la relation dans votre entité Collaborator
+            ->andWhere('ac.id IS NOT NULL')  // Vérifiez si la clé primaire de l'affaire n'est pas nulle pour garantir qu'il y a au moins une affaire associée
             ->orderBy('c.nom', 'ASC')
             ->getQuery()
             ->getResult();

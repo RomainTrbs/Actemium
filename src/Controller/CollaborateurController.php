@@ -9,6 +9,7 @@ use App\Form\CollaborateurType;
 use App\Repository\StatusRepository;
 use App\Repository\AffaireRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use App\Repository\CollaborateurRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -116,11 +117,11 @@ class CollaborateurController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'delete_collaborateur')]
-    public function delete(Request $request, Collaborateur $collaborateur): Response
+    #[Route('/delete/{id}', name: 'delete_collaborateur')]
+    public function delete(Request $request, Collaborateur $collaborateur, ManagerRegistry $doctrine): Response
     {
         if ($this->isCsrfTokenValid('delete'.$collaborateur->getId(), $request->request->get('_token'))) {
-            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager = $doctrine->getManager();
             $entityManager->remove($collaborateur);
             $entityManager->flush();
         }

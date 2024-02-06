@@ -6,10 +6,13 @@ use App\Entity\Poste;
 use App\Form\PosteType;
 use App\Repository\PosteRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
+use App\Repository\CollaborateurRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Doctrine\Persistence\ManagerRegistry as PersistenceManagerRegistry;
 
 #[Route('/poste')]
 class PosteController extends AbstractController
@@ -64,5 +67,34 @@ class PosteController extends AbstractController
             'poste' => $poste,
             'form' => $form->createView(),
         ]);
+    }
+
+    #[Route('/{id}', name: 'show_poste')]
+    public function show(Poste $poste, CollaborateurRepository $collaborateurRepository): Response
+    {
+        $collaborateurs = $collaborateurRepository->findAllByPoste($poste);
+
+        return $this->render('poste/show.html.twig', [
+            'poste' => $poste,
+            'collaborateurs' => $collaborateurs
+        ]);
+    }
+
+    #[Route('/delete/{id}', name: 'delete_poste')]
+    public function delete(Request $request, int $id, ManagerRegistry $doctrine): Response
+    {
+        $entityManager = $doctrine->getManager();
+        $poste = $entityManager->getRepository(Poste::class)->find($id);
+
+        if (!$poste) {
+            throw $this->createNotFoundException("Poste non trouvé avec l'id: " . $id);
+        }
+
+        if ($this->isCsrfTokenValid('delete'.$poste->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($poste);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('poste_index');
     }
 }
