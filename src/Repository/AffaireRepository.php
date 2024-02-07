@@ -53,6 +53,17 @@ class AffaireRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findAllOnGoingByDate($userId)
+    {
+        return $this->createQueryBuilder('affaire')
+            ->join('affaire.collaborateur', 'collaborateur')
+            ->where('collaborateur.representant = :userId')
+            ->setParameter('userId', $userId)
+            ->orderBy('affaire.date_debut', 'ASC')  // Specify the complete path to the 'client' field
+            ->getQuery()
+            ->getResult();
+    }
     
 
     public function findAllByUser($userId)

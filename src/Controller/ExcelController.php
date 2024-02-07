@@ -20,17 +20,108 @@ class ExcelController extends AbstractController
     {
         $user = $this->getUser();
         $userId = $user->getId();
-        $collaborateurs = $collaborateurRepository->findAllWithAffaires($user->getId());
+        
+        if(in_array('ROLE_SUPER_ADMIN', $user->getRoles())){
+            $collaborateurs = $collaborateurRepository->findAllWithAffairesOnly();
+        }else{
+            $collaborateurs = $collaborateurRepository->findAllWithAffaires($userId);
+        }
+
+        $referenceDate = new \DateTime('2023-01-01');
 
         $session = $request->getSession();
 
         // $session->start();
         // Fonction pour incrémenter la colonne
+        $d2 = new DateTime ;
+        $d2->modify('+365 days');
 
-        $firstDate = $session->get('firstDate');
-        $lastDate = $session->get('lastDate');
+        // Retrieve stored dates from the session or use default values
+        $firstDate = $session->get('firstDate', new DateTime);
+        $lastDate = $session->get('lastDate', $d2);
 
-        $ferie = ['01/01', '01/04', '01/05', '05/08', '09/05', '19/05', '20/05', '14/07', '15/08', '01/11', '11/11', '25/12'];
+        $annee1 = $firstDate->format('Y') ;
+        $joursFeries = [];
+
+        // Jour de l'an
+        $joursFeries[] = new \DateTime("$annee1-01-01");
+
+        // Fête du Travail
+        $joursFeries[] = new \DateTime("$annee1-05-01");
+
+        // Victoire des Alliés
+        $joursFeries[] = new \DateTime("$annee1-05-08");
+
+        // Fête Nationale
+        $joursFeries[] = new \DateTime("$annee1-07-14");
+
+        // Assomption
+        $joursFeries[] = new \DateTime("$annee1-08-15");
+
+        // Toussaint
+        $joursFeries[] = new \DateTime("$annee1-11-01");
+
+        // Armistice
+        $joursFeries[] = new \DateTime("$annee1-11-11");
+
+        // Noël
+        $joursFeries[] = new \DateTime("$annee1-12-25");
+
+        // Récupérer le lundi de Pâques
+        $joursFeries[] = $this->getPaques($annee1)->modify('+1 day');
+
+        // Récupérer l'Ascension
+        $joursFeries[] = $this->getPaques($annee1)->modify('+39 days');
+
+        // Récupérer le lundi de Pentecôte
+        $joursFeries[] = $this->getPaques($annee1)->modify('+50 days');
+
+        // Formater les dates pour l'affichage
+        $formattedDates = [];
+        foreach ($joursFeries as $jourFerie) {
+            $formattedDates[] = $jourFerie->format('Y-m-d');
+        }
+        $annee2 = $annee1 + 1 ;
+        // Jour de l'an
+        $joursFeries[] = new \DateTime("$annee2-01-01");
+
+        // Fête du Travail
+        $joursFeries[] = new \DateTime("$annee2-05-01");
+
+        // Victoire des Alliés
+        $joursFeries[] = new \DateTime("$annee2-05-08");
+
+        // Fête Nationale
+        $joursFeries[] = new \DateTime("$annee2-07-14");
+
+        // Assomption
+        $joursFeries[] = new \DateTime("$annee2-08-15");
+
+        // Toussaint
+        $joursFeries[] = new \DateTime("$annee2-11-01");
+
+        // Armistice
+        $joursFeries[] = new \DateTime("$annee2-11-11");
+
+        // Noël
+        $joursFeries[] = new \DateTime("$annee2-12-25");
+
+        // Récupérer le lundi de Pâques
+        $joursFeries[] = $this->getPaques($annee2)->modify('+1 day');
+
+        // Récupérer l'Ascension
+        $joursFeries[] = $this->getPaques($annee2)->modify('+39 days');
+
+        // Récupérer le lundi de Pentecôte
+        $joursFeries[] = $this->getPaques($annee2)->modify('+50 days');
+
+        // Formater les dates pour l'affichage
+        $formattedDates = [];
+        foreach ($joursFeries as $jourFerie) {
+            $formattedDates[] = $jourFerie->format('d/m');
+        }
+
+        // $ferie = ['01/01', '01/04', '01/05', '05/08', '09/05', '19/05', '20/05', '14/07', '15/08', '01/11', '11/11', '25/12'];
 
         // $ferie = ['01/01', '04/01','05/01', '05/08', '05/09', '05/19', '05/20', '07/14' ,'08/15', '11/01', '11/11', '12/25'];
 
@@ -101,20 +192,23 @@ class ExcelController extends AbstractController
             $jourSemaine = $dateDebut->format('l');
             $dateFormatee = $dateDebut->format('d/m');
             $numeroSemaine = $dateDebut->format('W');
-            $entier = $dateDebut->format('d/m/Y') ; 
+            $entier = $dateDebut; 
+            $interval = $referenceDate->diff($dateDebut);
+            $numJourActuelle = $interval->format('%a');
 
             $tableauDates[] = array(
                 'annee' => $annee,
                 'jourSemaine' => $jourSemaine,
                 'dateFormatee' => $dateFormatee,
                 'numeroSemaine' => $numeroSemaine,
-                'entier' => $entier
+                'entier' => $entier,
+                'numJourActuelle' => $numJourActuelle,
             );
 
             $dateDebut->modify('+1 day'); // Passage à la prochaine journée
         }
 
-        $row = 5;
+        $row = 4;
 
 
         $ligne = 1;
@@ -147,9 +241,95 @@ class ExcelController extends AbstractController
 
         }
 
-        foreach($collaborateurs as $collaborateur){
-            foreach($collaborateur->getAffaires() as $affaire){
+        // foreach($collaborateurs as $collaborateur){
+        //     foreach($collaborateur->getAffaires() as $affaire){
+        //         $col = 12;
+        //         $affaireDebut = clone $affaire->getDateDebut();
+        //         $affaireDebut = DateTime::createFromFormat('d/m/Y', $affaireDebut->format('d/m/Y'));
+        //         $fractionnement = 0;
+        //         $FinAffaires = clone $affaire->getDateDebut();
+        //         $FinAffaires = DateTime::createFromFormat('d/m/Y', $FinAffaires->format('d/m/Y'));
+        //         $FinAffaires->modify('-1 day');
+
+        //         //Calculer le nombre de jours
+        //         $nombreJours = ($affaire->getNbreHeure()) / ($collaborateur->getHrSemaine() / $collaborateur->getJourSemaine());
+
+        //         // Arrondir vers le haut
+        //         $nombreJours = ceil($nombreJours);
+        //         $FinAffaires->modify('+'.$nombreJours .'days');
+
+        //         foreach($tableauDates as $date){
+        //             if(in_array($date['jourSemaine'], $weekend) || in_array($date['dateFormatee'], $ferie)){
+        //                 if($jourFr[$date['jourSemaine']] == "Sam"){
+        //                     $sheet->setCellValue([$col, $row], 'Sam' .$affaireDebut->format('d/m') . ' ' . $date['dateFormatee'] . ' ' . $FinAffaires->format('d/m'));
+        //                     if($affaireDebut <= $dateDebut && $FinAffaires >= $dateDebut){
+        //                         $FinAffaires->modify('+1 day');
+        //                     }
+        //                     $sheet->getStyle($col.''.$row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('ffffff');
+        //                 }elseif($jourFr[$date['jourSemaine']] == "Dim"){
+        //                     $sheet->setCellValue([$col, $row], 'Dim' .$affaireDebut->format('d/m') . ' ' . $date['dateFormatee'] . ' ' . $FinAffaires->format('d/m'));
+        //                     if($affaireDebut <= $dateDebut && $FinAffaires >= $dateDebut){
+        //                         $FinAffaires->modify('+1 day');
+        //                     }
+        //                     $sheet->getStyle($col.''.$row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('ffffff');
+        //                 }elseif(in_array($date['dateFormatee'], $ferie)){
+        //                     $sheet->setCellValue([$col, $row], 'F' .$affaireDebut->format('d/m') . ' ' . $date['dateFormatee'] . ' ' . $FinAffaires->format('d/m'));
+        //                     if($affaireDebut <= $dateDebut && $FinAffaires >= $dateDebut){
+        //                         $FinAffaires->modify('+1 day');
+        //                     }
+        //                     $sheet->getStyle($col.''.$row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('ffffff');
+        //                 }                        
+        //             }else{
+        //                 if($affaireDebut <= $date['dateFormatee'] && $FinAffaires >= $date['dateFormatee']){
+        //                     $sheet->setCellValue([$col, $row], $affaireDebut->format('d/m') . ' ' . $date['dateFormatee'] . ' ' . $FinAffaires->format('d/m'));
+        //                     $sheet->getStyle([$col, $row] )->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('00ffff'); 
+        //                 }elseif($FinAffaires <= $date['dateFormatee'] && $affaire->getNbreJourFractionnement() > $fractionnement){
+        //                     $fractionnement++ ;
+        //                     $sheet->setCellValue([$col, $row], $affaireDebut->format('d/m') . ' ' . $date['dateFormatee'] . ' ' . $FinAffaires->format('d/m'));
+        //                     $sheet->getStyle([$col, $row] )->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('c0c0c0'); 
+        //                 }else{
+        //                     $sheet->setCellValue([$col, $row], $affaireDebut->format('d/m') . ' ' . $date['dateFormatee'] . ' ' . $FinAffaires->format('d/m'));
+        //                 }
+        //             }
+        //             $col++;
+        //         }
+        //         $row++;
+        //     }
+        // }
+        foreach ($collaborateurs as $collaborateur) {
+            foreach ($collaborateur->getAffaires() as $affaire) {
+                
                 $col = 12;
+                if($collaborateur->getCouleur() != null){
+                    $couleurSansHashtag = ltrim($collaborateur->getCouleur(), '#');
+                }
+                else{
+                    $couleurSansHashtag = 'FFFFFF';
+                }
+                
+                $row++;
+                $annee = substr($affaire->getDateDebut()->format('Y'), -2);
+                // Utiliser $row pour déterminer la ligne actuelle
+                $sheet->setCellValue("A" . $row, $affaire->getNumAffaire());
+                $sheet->setCellValue("B" . $row, $collaborateur->getNom() . " " . $collaborateur->getPrenom());
+                $sheet->setCellValue("C" . $row, $affaire->getClient());
+                $sheet->setCellValue("D" . $row, $affaire->getDesignation());
+                $sheet->setCellValue("E" . $row, $affaire->getNbreHeure());
+                $sheet->setCellValue("F" . $row, $affaire->getDateDebut()->format('d/m/').$annee);
+                $sheet->setCellValue("G" . $row, $affaire->getHeurePasse());
+                $sheet->setCellValue("H" . $row, $affaire->getDatefin());
+                $sheet->setCellValue("I" . $row, $affaire->getNbreJourFractionnement());
+                $sheet->setCellValue("J" . $row, $affaire->getPourcentReserve());
+                $sheet->setCellValue("K" . $row, $affaire->getNbreHeure());
+                $sheet->getStyle('B'. $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB($couleurSansHashtag);
+                $sheet->getStyle('H'. $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB($couleurSansHashtag);
+                $sheet->getStyle('I'. $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB($couleurSansHashtag);
+                $sheet->getStyle('J'. $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB($couleurSansHashtag);
+               
+
+
+                
+
                 $affaireDebut = clone $affaire->getDateDebut();
                 $affaireDebut = DateTime::createFromFormat('d/m/Y', $affaireDebut->format('d/m/Y'));
                 $fractionnement = 0;
@@ -160,178 +340,57 @@ class ExcelController extends AbstractController
                 //Calculer le nombre de jours
                 $nombreJours = ($affaire->getNbreHeure()) / ($collaborateur->getHrSemaine() / $collaborateur->getJourSemaine());
 
+                
                 // Arrondir vers le haut
                 $nombreJours = ceil($nombreJours);
                 $FinAffaires->modify('+'.$nombreJours .'days');
 
-                foreach($tableauDates as $date){
-                    if(in_array($date['jourSemaine'], $weekend) || in_array($date['dateFormatee'], $ferie)){
-                        if($jourFr[$date['jourSemaine']] == "Sam"){
-                            $sheet->setCellValue([$col, $row], 'Sam' .$affaireDebut->format('d/m') . ' ' . $date['dateFormatee'] . ' ' . $FinAffaires->format('d/m'));
-                            if($affaireDebut <= $dateDebut && $FinAffaires >= $dateDebut){
-                                $FinAffaires->modify('+1 day');
+                $interval = $referenceDate->diff($affaire->getDateDebut());
+                $numJourDebut = $interval->format('%a');
+                $interval = $referenceDate->diff($FinAffaires);
+                $numJourFin = $interval->format('%a');
+                
+                $col = 12;
+
+                foreach($tableauDates as $date) {
+                    if (in_array($date['jourSemaine'], $weekend) || in_array($date['dateFormatee'], $formattedDates)) {
+                        if($date['jourSemaine'] == 'Saturday'){
+                            $sheet->setCellValue([$col, $row], 'Sam');
+                            if($numJourDebut <= $date['numJourActuelle'] && $numJourFin >= $date['numJourActuelle']){
+                                $numJourFin++;
                             }
-                        }elseif($jourFr[$date['jourSemaine']] == "Dim"){
-                            $sheet->setCellValue([$col, $row], 'Dim' .$affaireDebut->format('d/m') . ' ' . $date['dateFormatee'] . ' ' . $FinAffaires->format('d/m'));
-                            if($affaireDebut <= $dateDebut && $FinAffaires >= $dateDebut){
-                                $FinAffaires->modify('+1 day');
+                        }
+                        elseif($date['jourSemaine'] == 'Sunday'){
+                            $sheet->setCellValue([$col, $row], 'Dim');
+                            if($numJourDebut <= $date['numJourActuelle'] && $numJourFin >= $date['numJourActuelle']){
+                                $numJourFin++;
                             }
-                        }elseif(in_array($date['dateFormatee'], $ferie)){
-                            $sheet->setCellValue([$col, $row], 'F' .$affaireDebut->format('d/m') . ' ' . $date['dateFormatee'] . ' ' . $FinAffaires->format('d/m'));
-                            if($affaireDebut <= $dateDebut && $FinAffaires >= $dateDebut){
-                                $FinAffaires->modify('+1 day');
+                        }
+                        elseif(in_array($date['dateFormatee'], $formattedDates)){
+                            $sheet->setCellValue([$col, $row], 'F');
+                            if($numJourDebut <= $date['numJourActuelle'] && $numJourFin >= $date['numJourActuelle']){
+                                $numJourFin++;
                             }
                         }                        
-                    }else{
-                        if($affaireDebut <= $date['dateFormatee'] && $FinAffaires >= $date['dateFormatee']){
-                            $sheet->setCellValue([$col, $row], $affaireDebut->format('d/m') . ' ' . $date['dateFormatee'] . ' ' . $FinAffaires->format('d/m'));
+                    }elseif($numJourDebut <= $date['numJourActuelle'] && $numJourFin >= $date['numJourActuelle']){
+                            $sheet->setCellValue([$col, $row], '');
                             $sheet->getStyle([$col, $row] )->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('00ffff'); 
-                        }elseif($FinAffaires <= $date['dateFormatee'] && $affaire->getNbreJourFractionnement() > $fractionnement){
-                            $fractionnement++ ;
-                            $sheet->setCellValue([$col, $row], $affaireDebut->format('d/m') . ' ' . $date['dateFormatee'] . ' ' . $FinAffaires->format('d/m'));
-                            $sheet->getStyle([$col, $row] )->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('c0c0c0'); 
-                        }else{
-                            $sheet->setCellValue([$col, $row], $affaireDebut->format('d/m') . ' ' . $date['dateFormatee'] . ' ' . $FinAffaires->format('d/m'));
-                        }
-                    }
-                    $col++;
-                }
-                $row++;
-            }
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // foreach ($collaborateurs as $collaborateur) {
-        //     foreach ($collaborateur->getAffaires() as $affaire) {
-                
-        //         $col = 12;
-        //         if($collaborateur->getCouleur() != null){
-        //             $couleurSansHashtag = ltrim($collaborateur->getCouleur(), '#');
-        //         }
-        //         else{
-        //             $couleurSansHashtag = 'FFFFFF';
-        //         }
-                
-        //         $row++;
-        //         $annee = substr($affaire->getDateDebut()->format('Y'), -2);
-        //         // Utiliser $row pour déterminer la ligne actuelle
-        //         $sheet->setCellValue("A" . $row, $affaire->getNumAffaire());
-        //         $sheet->setCellValue("B" . $row, $collaborateur->getNom() . " " . $collaborateur->getPrenom());
-        //         $sheet->setCellValue("C" . $row, $affaire->getClient());
-        //         $sheet->setCellValue("D" . $row, $affaire->getDesignation());
-        //         $sheet->setCellValue("E" . $row, $affaire->getNbreHeure());
-        //         $sheet->setCellValue("F" . $row, $affaire->getDateDebut()->format('d/m/').$annee);
-        //         $sheet->setCellValue("G" . $row, $affaire->getHeurePasse());
-        //         $sheet->setCellValue("H" . $row, $affaire->getDatefin());
-        //         $sheet->setCellValue("I" . $row, $affaire->getNbreJourFractionnement());
-        //         $sheet->setCellValue("J" . $row, $affaire->getPourcentReserve());
-        //         $sheet->setCellValue("K" . $row, $affaire->getNbreHeure());
-        //         $sheet->getStyle('B'. $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB($couleurSansHashtag);
-        //         $sheet->getStyle('H'. $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB($couleurSansHashtag);
-        //         $sheet->getStyle('I'. $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB($couleurSansHashtag);
-        //         $sheet->getStyle('J'. $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB($couleurSansHashtag);
-               
-
-
-
-        //         $FinAffaires = clone $affaire->getDateDebut();
-
-        //         // Soustraire un jour
-        //         $FinAffaires->modify('-1 day');
-
-        //         // Calculer le nombre de jours
-        //         $nombreJours = ($affaire->getNbreHeure()) / ($collaborateur->getHrSemaine() / $collaborateur->getJourSemaine());
-
-        //         // Arrondir vers le haut
-        //         $nombreJours = ceil($nombreJours);
-
-        //         // Ajouter le nombre de jours à la date
-        //         $FinAffaires->modify('+' . $nombreJours . ' days');
-        //         $fractionnement = 0 ; 
-        //         $col = 12;
-        //         foreach($tableauDates as $date) {
-        //             if (in_array($date['jourSemaine'], $weekend) || in_array($date['dateFormatee'], $ferie)) {
-        //                 if($date['jourSemaine'] == 'Saturday'){
-        //                     $sheet->setCellValue([$col, $row], 'Sam' .$affaire->getDateDebut()->format('d/m') . ' ' . $date['dateFormatee'] . ' ' . $FinAffaires->format('d/m'));
-        //                     if($affaire->getDateDebut() <= $dateDebut && $FinAffaires >= $dateDebut){
-        //                         $FinAffaires->modify('+1 day');
-        //                     }
-        //                 }
-        //                 elseif($date['jourSemaine'] == 'Sunday'){
-        //                     $sheet->setCellValue([$col, $row], 'Dim' . $affaire->getDateDebut()->format('d/m') . ' ' . $date['dateFormatee'] . ' ' . $FinAffaires->format('d/m'));
-        //                     if($affaire->getDateDebut() <= $dateDebut && $FinAffaires >= $dateDebut){
-        //                         $FinAffaires->modify('+1 day');
-        //                     }
-        //                 }
-        //                 elseif(in_array($date['dateFormatee'], $ferie)){
-        //                     $sheet->setCellValue([$col, $row], 'F' . $affaire->getDateDebut()->format('d/m') . ' ' . $date['dateFormatee'] . ' ' . $FinAffaires->format('d/m'));
-        //                     if($affaire->getDateDebut() <= $dateDebut && $FinAffaires >= $dateDebut){
-        //                         $FinAffaires->modify('+1 day');
-        //                     }
-        //                 }                        
-        //             }elseif($affaire->getDateDebut() <= $dateDebut && $FinAffaires >= $dateDebut){
-        //                 $sheet->setCellValue([$col, $row], $affaire->getDateDebut()->format('d/m') . ' ' . $date['dateFormatee'] . ' ' . $FinAffaires->format('d/m'));
-        //                 $sheet->getStyle([$col, $row] )->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('00ffff'); 
-        //             }elseif($FinAffaires < $dateDebut && $fractionnement < $affaire->getNbreJourFractionnement()){                        
-        //                 $sheet->setCellValue([$col, $row], $affaire->getDateDebut()->format('d/m') . ' ' . $date['dateFormatee'] . ' ' . $FinAffaires->format('d/m'));
-        //                 $sheet->getStyle([$col, $row] )->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('c0c0c0'); 
-        //                 $fractionnement++ ;
-        //             }else{
-        //                 $sheet->setCellValue([$col, $row], $affaire->getDateDebut()->format('d/m') . ' ' . $date['dateFormatee'] . ' ' . $FinAffaires->format('d/m'));
+                    }elseif($numJourFin < $date['numJourActuelle'] && $fractionnement < $affaire->getNbreJourFractionnement()){                        
+                        $sheet->setCellValue([$col, $row], '');
+                        $sheet->getStyle([$col, $row] )->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('c0c0c0'); 
+                        $fractionnement++ ;
+                    }else{
+                        $sheet->setCellValue([$col, $row], '');
                         
-        //             }
+                    }
 
                     
 
 
-        //             $col++; // Passer à la ligne suivante
+                    $col++; // Passer à la ligne suivante
                     
 
-        //         }
+                }
                 // $FinAffaires = $affaire->getDateDebut();
 
                 // // Soustraire un jour
@@ -383,7 +442,7 @@ class ExcelController extends AbstractController
         
                 // }
                
-            //}
+            }
 
             $row++;
             $col = $col - 1 ;
@@ -392,7 +451,7 @@ class ExcelController extends AbstractController
             $value6 = $value5 . $row;
             $sheet->getStyle($value4.':'.$value6 )->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('ffff00'); // Jaune
             $col = $col +1 ;
-        // }
+        }
 
 
         $col = $col - 1;
@@ -404,11 +463,11 @@ class ExcelController extends AbstractController
         $i = 12;
         while($i <= $col){
             $valuetemp = Coordinate::stringFromColumnIndex($i);
-            $sheet->getColumnDimension($valuetemp)->setWidth(10); //4.7
+            $sheet->getColumnDimension($valuetemp)->setWidth(4.7); // 4.7
             $i++;
         }
         $sheet->getStyle('L4:' . $value3)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_WHITE));
-        $sheet->getStyle('L4:'. $value3)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('000000'); // Jaune
+        $sheet->getStyle('L4:'. $value3)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('000000'); 
 
 
         
@@ -458,5 +517,24 @@ class ExcelController extends AbstractController
         return $response;
 
         return $this->redirectToRoute('affaire_index');
+    }
+    private function getPaques(int $annee): \DateTime
+    {
+        $a = $annee % 19;
+        $b = (int)($annee / 100);
+        $c = $annee % 100;
+        $d = (int)($b / 4);
+        $e = $b % 4;
+        $f = (int)(($b + 8) / 25);
+        $g = (int)(($b - $f + 1) / 3);
+        $h = (19 * $a + $b - $d - $g + 15) % 30;
+        $i = (int)($c / 4);
+        $k = $c % 4;
+        $l = (32 + 2 * $e + 2 * $i - $h - $k) % 7;
+        $m = (int)(($a + 11 * $h + 22 * $l) / 451);
+        $month = (int)(($h + $l - 7 * $m + 114) / 31);
+        $day = (($h + $l - 7 * $m + 114) % 31) + 1;
+
+        return new \DateTime("$annee-$month-$day");
     }
 }

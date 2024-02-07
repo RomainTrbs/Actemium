@@ -54,34 +54,61 @@ class AffaireController extends AbstractController
         // Retrieve stored dates from the session or use default values
         $firstDate = $session->get('firstDate', new DateTime);
         $lastDate = $session->get('lastDate', $d2);
+        $filtre = $session->get('filter', null);
 
         $value = $session->get('collaborateur', []);
-
-        $form2 = $this->createFormBuilder()
-        ->add('collaborateur', EntityType::class, [
-            'multiple' => true,
-            'required' => false,
-            'class' => Collaborateur::class,
-            'query_builder' => function (CollaborateurRepository $cr) use ($userId) {
-                return $cr->createQueryBuilder('c')
-                    ->andWhere('c.representant = :representantId')
-                    ->setParameter('representantId', $userId)
-                    ->andWhere('c.status = :statusId')
+        if(in_array('ROLE_SUPER_ADMIN', $user->getRoles())){
+            $form2 = $this->createFormBuilder()
+            ->add('collaborateur', EntityType::class, [
+                'multiple' => true,
+                'required' => false,
+                'class' => Collaborateur::class,
+                'query_builder' => function (CollaborateurRepository $cr) use ($userId) {
+                    return $cr->createQueryBuilder('a')
+                    ->andWhere('a.status = :statusId')
                     ->setParameter('statusId', 2)
-                    ->orderBy('c.nom', 'ASC');
-            },
-            'choice_label' => function ($collaborateur) {
-                return $collaborateur->getNom() . ' ' . $collaborateur->getPrenom();
-            }
-        ])
-        ->add('selectAll', CheckboxType::class, [
-            'mapped' => false, // Cette case à cocher n'est pas liée à une propriété de l'entité
-            'label' => 'Sélectionner tous les collaborateurs',
-            'required' => false, // L'utilisateur n'est pas obligé de la cocher
-            'attr' => ['class' => 'select-all-checkbox'],
-        ])
-        ->add('validate', SubmitType::class, ['label' => 'Valider', 'attr' => ['class' => 'btn btn-primary']])
-        ->getForm();
+                    ->orderBy('a.nom', 'ASC');
+                },
+                'choice_label' => function ($collaborateur) {
+                    return $collaborateur->getNom() . ' ' . $collaborateur->getPrenom();
+                }
+            ])
+            ->add('selectAll', CheckboxType::class, [
+                'mapped' => false, // Cette case à cocher n'est pas liée à une propriété de l'entité
+                'label' => 'Sélectionner tous les collaborateurs',
+                'required' => false, // L'utilisateur n'est pas obligé de la cocher
+                'attr' => ['class' => 'select-all-checkbox'],
+            ])
+            ->add('validate', SubmitType::class, ['label' => 'Valider', 'attr' => ['class' => 'btn btn-primary']])
+            ->getForm();
+        }
+        else{
+            $form2 = $this->createFormBuilder()
+            ->add('collaborateur', EntityType::class, [
+                'multiple' => true,
+                'required' => false,
+                'class' => Collaborateur::class,
+                'query_builder' => function (CollaborateurRepository $cr) use ($userId) {
+                    return $cr->createQueryBuilder('c')
+                        ->andWhere('c.representant = :representantId')
+                        ->setParameter('representantId', $userId)
+                        ->andWhere('c.status = :statusId')
+                        ->setParameter('statusId', 2)
+                        ->orderBy('c.nom', 'ASC');
+                },
+                'choice_label' => function ($collaborateur) {
+                    return $collaborateur->getNom() . ' ' . $collaborateur->getPrenom();
+                }
+            ])
+            ->add('selectAll', CheckboxType::class, [
+                'mapped' => false, // Cette case à cocher n'est pas liée à une propriété de l'entité
+                'label' => 'Sélectionner tous les collaborateurs',
+                'required' => false, // L'utilisateur n'est pas obligé de la cocher
+                'attr' => ['class' => 'select-all-checkbox'],
+            ])
+            ->add('validate', SubmitType::class, ['label' => 'Valider', 'attr' => ['class' => 'btn btn-primary']])
+            ->getForm();
+        }
 
         $form2->handleRequest($request);
 
@@ -96,6 +123,8 @@ class AffaireController extends AbstractController
                 }
                 // Store the filter and collaborator values in the session
                 $session->set('collaborateur', $collaborateurChoisi);
+                
+                $session->set('filter', null);
 
                 // Redirect the user to the same route with the parameters
                 return $this->redirectToRoute('affaire_index');
@@ -140,10 +169,42 @@ class AffaireController extends AbstractController
             // Handle other form submission logic here
         }
 
-        // Check if the user is logged in
-        if (!$user instanceof User) {
-            throw new LogicException('Aucun utilisateur connecté');
+        if ($request->query->has('filter')) {
+
+            $filter = $request->query->get('filter');
+            
+            switch ($filter) {
+                case 'client':
+                    $session->set('filter', 'client');
+                    break;
+                case 'date':
+                    $session->set('filter', 'date');
+                    break;
+                default:
+                    // Gérer le cas par défaut ici, par exemple, affecter une valeur par défaut à $affaires
+                    $filter = null;
+                    break;
+            }
         }
+
+        $filtre = $session->get('filter');
+        if($filtre != null){
+            if($filtre == 'client'){
+                $affaires = $affaireRepository->findAllOngoingByClient($userId);
+                $filter = 'client';
+            }else if($filtre == 'date'){
+                $affaires = $affaireRepository->findAllOngoingByDate($userId);
+                $filter = 'date';
+            }
+        }
+        
+
+        
+        // Check if the user is logged in
+            if (!$user instanceof User) {
+                throw new LogicException('Aucun utilisateur connecté');
+            }
+        
 
         // // Retrieve affaires related to the user
         // $affaires = $affaireRepository->findAllByUser($user->getId());
@@ -163,6 +224,7 @@ class AffaireController extends AbstractController
             $dateFin = new DateTime('2024-12-30');
         }
 
+        $annee1 = $firstDate->format('Y');
         $tableauDates = array();
 
         while ($dateDebut <= $dateFin) {
@@ -181,7 +243,87 @@ class AffaireController extends AbstractController
             $dateDebut->modify('+1 day'); // Passage à la prochaine journée
         }
 
-        $ferie = ['01/01', '04/01','05/01', '05/08', '05/09', '05/19', '05/20', '07/14' ,'08/15', '11/01', '11/11', '12/25'];
+        
+        
+        $joursFeries = [];
+
+        // Jour de l'an
+        $joursFeries[] = new \DateTime("$annee1-01-01");
+
+        // Fête du Travail
+        $joursFeries[] = new \DateTime("$annee1-05-01");
+
+        // Victoire des Alliés
+        $joursFeries[] = new \DateTime("$annee1-05-08");
+
+        // Fête Nationale
+        $joursFeries[] = new \DateTime("$annee1-07-14");
+
+        // Assomption
+        $joursFeries[] = new \DateTime("$annee1-08-15");
+
+        // Toussaint
+        $joursFeries[] = new \DateTime("$annee1-11-01");
+
+        // Armistice
+        $joursFeries[] = new \DateTime("$annee1-11-11");
+
+        // Noël
+        $joursFeries[] = new \DateTime("$annee1-12-25");
+
+        // Récupérer le lundi de Pâques
+        $joursFeries[] = $this->getPaques($annee1)->modify('+1 day');
+
+        // Récupérer l'Ascension
+        $joursFeries[] = $this->getPaques($annee1)->modify('+39 days');
+
+        // Récupérer le lundi de Pentecôte
+        $joursFeries[] = $this->getPaques($annee1)->modify('+50 days');
+
+        // Formater les dates pour l'affichage
+        $formattedDates = [];
+        foreach ($joursFeries as $jourFerie) {
+            $formattedDates[] = $jourFerie->format('Y-m-d');
+        }
+        $annee2 = $annee1 + 1 ;
+        // Jour de l'an
+        $joursFeries[] = new \DateTime("$annee2-01-01");
+
+        // Fête du Travail
+        $joursFeries[] = new \DateTime("$annee2-05-01");
+
+        // Victoire des Alliés
+        $joursFeries[] = new \DateTime("$annee2-05-08");
+
+        // Fête Nationale
+        $joursFeries[] = new \DateTime("$annee2-07-14");
+
+        // Assomption
+        $joursFeries[] = new \DateTime("$annee2-08-15");
+
+        // Toussaint
+        $joursFeries[] = new \DateTime("$annee2-11-01");
+
+        // Armistice
+        $joursFeries[] = new \DateTime("$annee2-11-11");
+
+        // Noël
+        $joursFeries[] = new \DateTime("$annee2-12-25");
+
+        // Récupérer le lundi de Pâques
+        $joursFeries[] = $this->getPaques($annee2)->modify('+1 day');
+
+        // Récupérer l'Ascension
+        $joursFeries[] = $this->getPaques($annee2)->modify('+39 days');
+
+        // Récupérer le lundi de Pentecôte
+        $joursFeries[] = $this->getPaques($annee2)->modify('+50 days');
+
+        // Formater les dates pour l'affichage
+        $formattedDates = [];
+        foreach ($joursFeries as $jourFerie) {
+            $formattedDates[] = $jourFerie->format('m/d');
+        }
 
         $weekend = ['Saturday', 'Sunday'];
 
@@ -191,12 +333,14 @@ class AffaireController extends AbstractController
             'affaires' => $affaires,
             'affairesAll' => $affairesAll,
             'tableauDates' => $tableauDates,
-            'ferie' => $ferie,
+            'ferie' => $joursFeries,
             'weekend' => $weekend,
             'collaborateurs' => isset($collaborateursChoisi) ? $collaborateursChoisi : $collaborateurs,
             'form' => $form->createView(),
             'form2' => $form2->createView(),
             'role' => $role,
+            'filter' => isset($filter) ? $filter : null,
+            'feriesFormatee' => $formattedDates,
         ]);
     }
 
@@ -224,8 +368,15 @@ class AffaireController extends AbstractController
 
         $affaire = new Affaire();
 
+        if(in_array('ROLE_SUPER_ADMIN', $user->getRoles())){
+            $isSuperAdmin = true;
+        }else{
+            $isSuperAdmin = false;
+        }
+
         $form = $this->createForm(AffaireType::class, $affaire, [
             'userId' => $userId,
+            'isSuperAdmin' => $isSuperAdmin,
         ]);
         $form->handleRequest($request);
 
@@ -234,7 +385,7 @@ class AffaireController extends AbstractController
             $em->persist($affaire);
             $em->flush();
 
-            return $this->redirectToRoute('affaire_index', ['id' => $affaire->getId()]);
+            return $this->redirectToRoute('affaire_index');
         }
 
         return $this->render('affaire/new.html.twig', [
@@ -248,6 +399,12 @@ class AffaireController extends AbstractController
         // Récupérer l'utilisateur actuellement authentifié
         $user = $security->getUser();        
         $userId = $user->getId();
+
+        if(in_array('ROLE_SUPER_ADMIN', $user->getRoles())){
+            $isSuperAdmin = true;
+        }else{
+            $isSuperAdmin = false;
+        }
         
         // Récupérer le collaborateur en charge de l'affaire
         $collaborateur = $affaire->getCollaborateur()[0];
@@ -256,15 +413,19 @@ class AffaireController extends AbstractController
         $representant = $collaborateur->getRepresentant();
 
         // Vérifier si l'utilisateur est autorisé à modifier cette affaire
-        if ($user->getId() !== $representant->getId()) {
+        if ($user->getId() !== $representant->getId() && $isSuperAdmin == false) {
             // Rediriger l'utilisateur ou afficher un message d'erreur
             // Vous pouvez personnaliser cela en fonction de vos besoins
             throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à modifier cette affaire.');
         }
 
+
+
         $form = $this->createForm(AffaireType::class, $affaire, [
             'userId' => $userId,
+            'isSuperAdmin' => $isSuperAdmin,
         ]);
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -295,5 +456,25 @@ class AffaireController extends AbstractController
         }
 
         return $this->redirectToRoute('affaire_index');
+    }
+
+    private function getPaques(int $annee): \DateTime
+    {
+        $a = $annee % 19;
+        $b = (int)($annee / 100);
+        $c = $annee % 100;
+        $d = (int)($b / 4);
+        $e = $b % 4;
+        $f = (int)(($b + 8) / 25);
+        $g = (int)(($b - $f + 1) / 3);
+        $h = (19 * $a + $b - $d - $g + 15) % 30;
+        $i = (int)($c / 4);
+        $k = $c % 4;
+        $l = (32 + 2 * $e + 2 * $i - $h - $k) % 7;
+        $m = (int)(($a + 11 * $h + 22 * $l) / 451);
+        $month = (int)(($h + $l - 7 * $m + 114) / 31);
+        $day = (($h + $l - 7 * $m + 114) % 31) + 1;
+
+        return new \DateTime("$annee-$month-$day");
     }
 }

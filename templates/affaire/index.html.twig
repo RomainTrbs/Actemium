@@ -15,6 +15,24 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+        .bouton-tri {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .bouton-tri:hover {
+            background-color: #0056b3;
+        }
+
+        .tri {
+            text-align: center;
+            margin-top: 50px;
+        }
     </style>
     {% block title %} Planning {% endblock %}
 {% endblock %}
@@ -48,8 +66,13 @@
                         {{ form_row(form2.validate) }}
                     </div>
                     {{ form_end(form2) }}
+                            
+            <a href="{{ path('affaire_index', {'filter': 'date'}) }}" class="btn btn-dark">Trier par date</a>
+
+            <a href="{{ path('affaire_index', {'filter': 'client'}) }}" class="btn btn-dark">Trier par client</a>
+
                 </div>
-            </div>
+            </div>            
         </div>
     </div>
     <div class="col-6"></div>
@@ -96,6 +119,31 @@
             </tr>
         </thead>
         <tbody style="height: 42px;">
+        {% if filter != null %}
+            {% for affaire in affaires %}
+            {% for collaborateur in affaire.collaborateur %}
+                <tr>
+                    <td class="small-cell" style="font-size: 10px; height: 42px;"><a href="/edit/{{ affaire.id }}">{{ affaire.NumAffaire }}</a></td>
+                    <td class="small-cell" style="font-size: 10px; height: 42px; background-color:{{ collaborateur.couleur }}">{{ collaborateur.nom }} {{ collaborateur.prenom }}</td>
+                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.Client }}</td>
+                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.Designation }}</td>
+                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.NbreHeure }}</td>
+                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.getDateDebut()|date('d/m/Y') }}</td>
+                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.HeurePasse }}</td>
+                    <td class="small-cell" style="font-size: 10px; height: 42px; background-color:{{ collaborateur.couleur }}">
+                        {% if affaire.DateFin is not null %}
+                            {{ affaire.getDateFin()|date('Y-m-d') }}
+                        {% endif %}
+                    </td>
+                    <td class="small-cell" style="font-size: 10px; height: 42px; background-color:{{ collaborateur.couleur }}">{{ affaire.NbreJourFractionnement }}</td>
+                    <td class="small-cell" style="font-size: 10px; height: 42px; background-color:{{ collaborateur.couleur }}">{{ affaire.PourcentReserve }}</td>
+
+
+                    {# Répéter ces cellules vides pour chaque jour #}
+                </tr>
+            {% endfor %}
+            {% endfor %}
+        {% else %}
         {% for collaborateur in collaborateurs %}
             {% for affaire in collaborateur.affaires %}
                                     {# {{ collaborateur.nom }}
@@ -108,13 +156,13 @@
                     <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.NbreHeure }}</td>
                     <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.getDateDebut()|date('d/m/Y') }}</td>
                     <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.HeurePasse }}</td>
-                    <td class="small-cell" style="font-size: 10px; height: 42px;">
+                    <td class="small-cell" style="font-size: 10px; height: 42px; background-color:{{ collaborateur.couleur }}">
                         {% if affaire.DateFin is not null %}
                             {{ affaire.getDateFin()|date('Y-m-d') }}
                         {% endif %}
                     </td>
-                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.NbreJourFractionnement }}</td>
-                    <td class="small-cell" style="font-size: 10px; height: 42px;">{{ affaire.PourcentReserve }}</td>
+                    <td class="small-cell" style="font-size: 10px; height: 42px; background-color:{{ collaborateur.couleur }}">{{ affaire.NbreJourFractionnement }}</td>
+                    <td class="small-cell" style="font-size: 10px; height: 42px; background-color:{{ collaborateur.couleur }}">{{ affaire.PourcentReserve }}</td>
 
 
                     {# Répéter ces cellules vides pour chaque jour #}
@@ -135,6 +183,7 @@
             </tr>
             {% endif %}
         {% endfor %}
+        {% endif %}
         </tbody>
     </table>
 </div>
@@ -157,39 +206,39 @@
     {% endfor %}
     </thead>
     <tbody>
-    {% for collaborateur in collaborateurs %}
-        {% for affaire in collaborateur.affaires %}
+    {% if filter != null %}
+        {% for affaire in affaires %}
+            {% for collaborateur in affaire.collaborateur %}
             {% set fractionnement = 0 %}
-            {% set FinAffaires = affaire.getDateDebut|date_modify('-1 day') %}
-            {% set nombreJours = (affaire.NbreHeure) / (collaborateur.HrSemaine / collaborateur.JourSemaine) %}
-            {% set nombreJours = nombreJours|round(0, 'ceil') %}
-            {% set FinAffaires = FinAffaires|date_modify('+' ~ nombreJours ~ ' days') %}
-                    
+                {% set FinAffaires = affaire.getDateDebut|date_modify('-1 day') %}
+                    {% set nombreJours = (affaire.NbreHeure) / (collaborateur.HrSemaine / collaborateur.JourSemaine) %}
+                    {% set nombreJours = nombreJours|round(0, 'ceil') %}
+                    {% set FinAffaires = FinAffaires|date_modify('+' ~ nombreJours ~ ' days') %}
+
             <tr>
                 {% for date in tableauDates %}
-                    {% if date.jourSemaine in weekend or date.dateFormatee in ferie %}
+                    {% if date.jourSemaine in weekend or date.dateFormatee in feriesFormatee %}
                     
                         {% if joursSemaines[date.jourSemaine] == "Sam" %}
                             <td class="small-cell" style="height: 10px; font-size:9px;">Sam</td>
-                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee and affaire.getDateDebut()|date('Y') == date.annee %}
+                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
                             {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
                             {% endif %}
 
                         {% elseif joursSemaines[date.jourSemaine] == "Dim" %}
                             <td class="small-cell" style="height: 10px; font-size:9px;">Dim</td>
-                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee and affaire.getDateDebut()|date('Y') == date.annee %}
+                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
                                 {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
                             {% endif %}
 
                         {% else %}
                             <td class="small-cell" style="height: 10px; font-size:9px;">F</td>
-                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee and affaire.getDateDebut()|date('Y') == date.annee %}
+                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
                                 {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
                             {% endif %}
                         {% endif %}  
-                        
-                    {% else %}
-                        {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee and affaire.getDateDebut()|date('Y') == date.annee %}
+                        {% else %}
+                        {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee %}
                             <td class="small-cell" style="height: 42px; background-color: #00ffff;"></td>
                         {% elseif FinAffaires|date('m/d') < date.dateFormatee and affaire.NbreJourFractionnement > fractionnement  %}
                         {% set fractionnement = fractionnement + 1 %}
@@ -201,16 +250,65 @@
                     {% endif %}
                 {% endfor %}
                 </tr>  
-            
-        {% endfor %}   
-        {% if not loop.last %}
-            <tr>
-            {% for date in tableauDates %}
-                <td class="small-cell" style="background-color:#ffff00;"></td>
-            {% endfor %}              
-            </tr>
-        {% endif %} 
-    {% endfor %}
+                    {% set collaborateur_precedent = affaire.collaborateur %}      
+            {% endfor %}
+        {% endfor %}
+    {% else %}
+        {% for collaborateur in collaborateurs %}
+            {% for affaire in collaborateur.affaires %}
+                {% set fractionnement = 0 %}
+                {% set FinAffaires = affaire.getDateDebut|date_modify('-1 day') %}
+                {% set nombreJours = (affaire.NbreHeure) / (collaborateur.HrSemaine / collaborateur.JourSemaine) %}
+                {% set nombreJours = nombreJours|round(0, 'ceil') %}
+                {% set FinAffaires = FinAffaires|date_modify('+' ~ nombreJours ~ ' days') %}
+                        
+                <tr>
+                    {% for date in tableauDates %}
+                        {% if date.jourSemaine in weekend or date.dateFormatee in feriesFormatee %}
+                        
+                            {% if joursSemaines[date.jourSemaine] == "Sam" %}
+                                <td class="small-cell" style="height: 10px; font-size:9px;">Sam</td>
+                                {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee and affaire.getDateDebut()|date('Y') == date.annee %}
+                                {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
+                                {% endif %}
+
+                            {% elseif joursSemaines[date.jourSemaine] == "Dim" %}
+                                <td class="small-cell" style="height: 10px; font-size:9px;">Dim</td>
+                                {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee and affaire.getDateDebut()|date('Y') == date.annee %}
+                                    {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
+                                {% endif %}
+
+                            {% else %}
+                                <td class="small-cell" style="height: 10px; font-size:9px;">F</td>
+                                {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee and affaire.getDateDebut()|date('Y') == date.annee %}
+                                    {% set FinAffaires = FinAffaires|date_modify('+1 day') %}
+                                {% endif %}
+                            {% endif %}  
+                            
+                        {% else %}
+                            {% if affaire.getDateDebut()|date('m/d') <= date.dateFormatee and FinAffaires|date('m/d') >= date.dateFormatee and affaire.getDateDebut()|date('Y') == date.annee %}
+                                <td class="small-cell" style="height: 42px; background-color: #00ffff;"></td>
+                            {% elseif FinAffaires|date('m/d') < date.dateFormatee and affaire.NbreJourFractionnement > fractionnement  %}
+                            {% set fractionnement = fractionnement + 1 %}
+                                <td class="small-cell" style="height: 42px; background-color: #c0c0c0;"></td>
+                            {% else %}
+                                <td class="small-cell" style="height: 42px;"></td>
+                            {% endif %}
+
+                        {% endif %}
+                    {% endfor %}
+                    </tr>  
+                
+            {% endfor %}   
+            {% if not loop.last %}
+                <tr>
+                {% for date in tableauDates %}
+                    <td class="small-cell" style="background-color:#ffff00;"></td>
+                {% endfor %}              
+                </tr>
+            {% endif %} 
+        {% endfor %}
+    {% endif %}
     </tbody>
     </table>
 </div>
