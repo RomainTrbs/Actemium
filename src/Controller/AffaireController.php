@@ -40,7 +40,13 @@ class AffaireController extends AbstractController
         $userId = $user->getId();
         
         $role = $user->getRoles();
-        if(in_array('ROLE_SUPER_ADMIN', $user->getRoles())){
+        if(in_array('ROLE_SUPER_ADMIN', $role)){
+            $isSuperAdmin = true;
+        }else{
+            $isSuperAdmin = false;
+        }
+
+        if($isSuperAdmin){
             $collaborateurs = $collaborateurRepository->findAllWithAffairesOnly();
         }else{
             $collaborateurs = $collaborateurRepository->findAllWithAffaires($user->getId());
@@ -186,14 +192,22 @@ class AffaireController extends AbstractController
                     break;
             }
         }
-
+        
         $filtre = $session->get('filter');
         if($filtre != null){
             if($filtre == 'client'){
-                $affaires = $affaireRepository->findAllOngoingByClient($userId);
+                if(isset($collaborateursChoisi)){
+                    $affaires = $affaireRepository->findAllOngoingByClient($userId, $collaborateursChoisi, $isSuperAdmin);
+                }else{
+                    $affaires = $affaireRepository->findAllOngoingByClient($userId, $collaborateurs, $isSuperAdmin);
+                }
                 $filter = 'client';
             }else if($filtre == 'date'){
-                $affaires = $affaireRepository->findAllOngoingByDate($userId);
+                if(isset($collaborateursChoisi)){
+                    $affaires = $affaireRepository->findAllOngoingByDate($userId, $collaborateursChoisi);
+                }else{
+                    $affaires = $affaireRepository->findAllOngoingByDate($userId, $collaborateurs);
+                }
                 $filter = 'date';
             }
         }

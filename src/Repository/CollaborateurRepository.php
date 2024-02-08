@@ -41,6 +41,15 @@ class CollaborateurRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findAllByRepresentant($userId)
+    {
+        return $this->createQueryBuilder('a')
+            ->andWhere('a.representant = :userId')
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->getResult();
+    }
     
     public function findAllByPoste(Poste $poste)
     {

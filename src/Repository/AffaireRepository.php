@@ -43,27 +43,42 @@ class AffaireRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findAllOnGoingByClient($userId)
+    public function findAllOnGoingByClient($userId, array $collaborators, $isSuperAdmin = false)
     {
-        return $this->createQueryBuilder('affaire')
+        $queryBuilder = $this->createQueryBuilder('affaire')
             ->join('affaire.collaborateur', 'collaborateur')
-            ->where('collaborateur.representant = :userId')
-            ->setParameter('userId', $userId)
+            ->andWhere('collaborateur IN (:collaborators)')
+            ->setParameter('collaborators', $collaborators);
+
+            if (!$isSuperAdmin) {
+                $queryBuilder->andWhere('collaborateur.representant = :userId');
+                $queryBuilder->setParameter('userId', $userId);
+            }
+            return $queryBuilder
             ->orderBy('affaire.client', 'ASC')  // Specify the complete path to the 'client' field
             ->getQuery()
             ->getResult();
     }
 
-    public function findAllOnGoingByDate($userId)
+    public function findAllOnGoingByDate($userId, array $collaborators, $selectAllCollaborators = false)
     {
-        return $this->createQueryBuilder('affaire')
+        $queryBuilder = $this->createQueryBuilder('affaire')
             ->join('affaire.collaborateur', 'collaborateur')
-            ->where('collaborateur.representant = :userId')
-            ->setParameter('userId', $userId)
-            ->orderBy('affaire.date_debut', 'ASC')  // Specify the complete path to the 'client' field
+            ->andWhere('collaborateur IN (:collaborators)')
+            ->setParameter('collaborators', $collaborators);
+
+        if (!$selectAllCollaborators) {
+            $queryBuilder->andWhere('collaborateur.representant = :userId');
+            $queryBuilder->setParameter('userId', $userId);
+        }
+
+        return $queryBuilder
+            ->orderBy('affaire.date_debut', 'ASC')
             ->getQuery()
             ->getResult();
     }
+
+
     
 
     public function findAllByUser($userId)

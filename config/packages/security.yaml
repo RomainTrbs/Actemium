@@ -42,6 +42,8 @@ security:
         - { path: ^/$, roles: ROLE_USER }
         - { path: ^/logout, roles: ROLE_USER }
         - { path: ^/, roles: ROLE_ADMIN }
+        - { path: ^/user/uprole, roles: ROLE_SUPER_ADMIN }
+        - { path: ^/user/downrole, roles: ROLE_SUPER_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
     access_denied_url: /insufficient-permissions
 

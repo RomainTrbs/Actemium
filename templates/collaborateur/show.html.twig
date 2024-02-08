@@ -56,11 +56,33 @@
                 <hr>
                 <div class="row mb-2">
                     <div class="col-md-auto my-auto" align="left"><span style="font-weight: bold;">Nom du Representant</span></div>
-                    <div class="col" align="right">{{ collaborateur.representant.collaborateur.prenom }} {{ collaborateur.representant.collaborateur.nom }}</div>
+                    <div class="col" align="right">
+                    {% if collaborateur.representant is not null %} 
+                        {{ collaborateur.representant.collaborateur.prenom }} {{ collaborateur.representant.collaborateur.nom }} 
+                    {% else %}
+                        Aucun représentant n'a été assigné à ce collaborateur. Pour en ajouter un, appuyez sur modifier, puis sélectionnez le représentant que vous souhaitez.
+                    {% endif %}
+                    </div>
                 </div>
                 <div class="row mb-2">
                     <div class="col-md-auto my-auto" align="left"><span style="font-weight: bold;">Poste</span></div>
-                    <div class="col" align="right">{{ collaborateur.poste.Nom }}</div>
+                    <div class="col" align="right">
+                    {% if collaborateur.poste is not null %} 
+                        {{ collaborateur.poste.Nom }} 
+                    {% else %}
+                        Aucun poste n'a été assigné à ce collaborateur. Pour en ajouter un, appuyez sur modifier, puis sélectionnez le poste que vous souhaitez.
+                    {% endif %}</div>
+                </div>
+                <hr>
+                <div class="row mb-2">
+                    <div class="col-md-auto my-auto" align="left"><span style="font-weight: bold;">Couleur dans le tableau</span></div>
+                    <div class="col" align="right">
+                    {% if collaborateur.poste is not null %} 
+                        <div style="background-color: {{ collaborateur.couleur }};">{{ collaborateur.couleur }}</div>
+                    {% else %}
+                        Aucune couleur n'a été assigné à ce collaborateur. Pour en ajouter une, appuyez sur modifier, puis sélectionnez la couleur que vous souhaitez.
+                    {% endif %}
+                    </div>                
                 </div>
                 <hr>
             </div>

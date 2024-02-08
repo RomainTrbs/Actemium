@@ -5,30 +5,44 @@
 {% endblock %}
 
 {% block body %}
-    <div class="container mt-4">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="font-weight-bold mb-0">{{ user.collaborateur.prenom }} {{ user.collaborateur.nom }}</h2>
-            </div>
-            <div class="card-body">
-                <dl class="row">
-                    <dt class="col-sm-3">Nom d'utilisateur :</dt>
-                    <dd class="col-sm-9">{{ user.username }}</dd>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="font-weight-bold mb-0">{{ user.collaborateur.prenom }} {{ user.collaborateur.nom }}</h2>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Nom d'utilisateur :</dt>
+                <dd class="col-sm-9">{{ user.username }}</dd>
 
-                    <dt class="col-sm-3">Rôles :</dt>
-                    <dd class="col-sm-9">
-                        {% if user.roles is not empty %}
-                            <ul>
-                                {% for role in user.roles %}
-                                    <li>{{ role }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            Aucun rôle défini.
-                        {% endif %}
-                    </dd>
-                </dl>
+                <dt class="col-sm-3">Rôles :</dt>
+                <dd class="col-sm-9">
+                    {% if user.roles is not empty %}
+                        <ul>
+                            {% for role in user.roles %}
+                                <li>{{ role }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        Aucun rôle défini.
+                    {% endif %}
+                </dd>
+            </dl>
+            <div class="float-right" role="group">
+                <a href="{{ path('app_edit_user', {'id': user.id}) }}" class="btn btn-primary mr-2">Modifier</a>
+                {{ include('registration/_delete_form.html.twig') }}                
             </div>
+            <div class="btn-group mr-2" role="group">
+                <a href="{{ path('app_downrole_user', {'id': user.id}) }}" class="btn btn-info mr-2">Réduire l'accréditation (Rôles)</a>
+                <a href="{{ path('app_uprole_user', {'id': user.id}) }}" class="btn btn-warning">Augmenter l'accréditation (Rôles)</a>
+            </div>
+            
+
+            {% if user.id == app.user.id %}
+                <hr>
+                <h6 class="font-weight-bold mb-0" style="color : red;">Attention il est risqué de modifier sa propre accrédiation, avant de le faire vérifier bien qu'une autre personne ai les droits 'SUPER_ADMIN', sinon vous risqueriez de ne plus avoir le contrôle sur le site et ceci de manière définitive.</h6>
+            {% endif %}
         </div>
     </div>
+</div>
 {% endblock %}

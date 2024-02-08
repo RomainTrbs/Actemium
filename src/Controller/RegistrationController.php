@@ -14,6 +14,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Doctrine\Persistence\ManagerRegistry as PersistenceManagerRegistry;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -100,6 +103,9 @@ class RegistrationController extends AbstractController
 
             $collaborateur->setNom($form2->get('nom')->getData());
             $collaborateur->setPrenom($form2->get('prenom')->getData());
+            $collaborateur->setHrJour(7.4);
+            $collaborateur->setHrSemaine(37);            
+            $collaborateur->setJourSemaine(5);
 
             $entityManager = $doctrine->getManager();
             $entityManager->persist($collaborateur);
@@ -154,36 +160,119 @@ class RegistrationController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_edit_user')]
-    public function edit(Request $request, User $user, PersistenceManagerRegistry $doctrine): Response
+    #[Route('/uprole/{id}', name: 'app_uprole_user')]
+    public function upRole(User $user, PersistenceManagerRegistry $doctrine)
     {
-        $form = $this->createForm(RegistrationFormType::class, $user);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $doctrine->getManager()->flush();
-
-            return $this->redirectToRoute('affaire_index', [
-                'id' => $user->getId(),
-            ]);
+        $roles = $user->getRoles();
+        if(in_array('ROLE_ADMIN', $roles)){
+            $givenRole = ["ROLE_SUPER_ADMIN"];
+            $user->setRoles($givenRole);
+        }else{
+            $givenRole = ["ROLE_ADMIN"];
+            $user->setRoles($givenRole);
         }
 
+        $entityManager = $doctrine->getManager();
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('app_show_user', ['id' => $user->getId()]);
+    }
+
+    #[Route('/downrole/{id}', name: 'app_downrole_user')]
+    public function downRole(User $user, PersistenceManagerRegistry $doctrine)
+    {
+        $roles = $user->getRoles();
+        if(in_array('ROLE_SUPER_ADMIN', $roles)){
+            $givenRole = ["ROLE_ADMIN"];
+            $user->setRoles($givenRole);
+        }else{
+            $givenRole = ["ROLE_USER"];
+            $user->setRoles($givenRole);
+        }
+
+        $entityManager = $doctrine->getManager();
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('app_show_user', ['id' => $user->getId()]);
+    }
+
+    #[Route('/edit/{id}', name: 'app_edit_user')]
+    public function edit(Request $request, User $user, PersistenceManagerRegistry $doctrine, EntityManagerInterface $entityManager, UserPasswordHasherInterface $userPasswordHasher): Response
+    {
+        $form = $this->createFormBuilder($user)
+            ->add('username', TextType::class)
+            ->add('password', RepeatedType::class, [
+                'type' => PasswordType::class,
+                'invalid_message' => 'Les deux mots de passe doivent correspondre.',
+                'options' => ['attr' => ['class' => 'password-field']],
+                'required' => true,
+                'first_options'  => ['label' => 'Mot de passe'],
+                'second_options' => ['label' => 'Confirmer le mot de passe'],
+            ])
+            ->getForm();
+    
+        $form->handleRequest($request);
+    
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Hashage du mot de passe
+            $user->setPassword(
+                $userPasswordHasher->hashPassword(
+                    $user,
+                    $form->get('password')->getData()
+                )
+            );
+            
+            // Mettre à jour l'utilisateur
+            $entityManager = $doctrine->getManager();
+            $entityManager->persist($user);
+            $entityManager->flush();
+    
+            return $this->redirectToRoute('app_show_user', ['id' => $user->getId()]);
+        }
+    
         return $this->render('registration/edit.html.twig', [
             'user' => $user,
             'registrationForm' => $form->createView(),
         ]);
-    }
+    }    
+   
 
-    #[Route('/{id}', name: 'app_delete_user')]
-    public function delete(Request $request, Collaborateur $user): Response
+    #[Route('/delete/{id}', name: 'app_delete_user')]
+    public function delete(Request $request, User $user, PersistenceManagerRegistry $doctrine, CollaborateurRepository $collaborateurRepository): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->request->get('_token'))) {
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->remove($user);
-            $entityManager->flush();
+        // Fetch all Collaborateurs
+        $collaborateurs = $collaborateurRepository->findAllByRepresentant($user->getId());
+        
+        // Check if the user has the ROLE_SUPER_ADMIN role
+        if (in_array('ROLE_ADMIN', $user->getRoles())) {
+            // Get the associated Collaborateur
+            $associatedCollaborateur = $user->getCollaborateur();
+            
+            // Loop through all Collaborateurs and remove the representant association
+            foreach ($collaborateurs as $collaborateur) {
+                $collaborateur->setRepresentant(null);                                
+            }
+            
+            // If the CSRF token is valid, delete the User and its associated Collaborateur
+            if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->request->get('_token'))) {
+                $entityManager = $doctrine->getManager();
+                $entityManager->remove($user);
+                $entityManager->remove($associatedCollaborateur);
+                $entityManager->flush();
+            }
+        } else {
+            // If the CSRF token is valid, delete only the User
+            if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->request->get('_token'))) {
+                $entityManager = $doctrine->getManager();
+                $entityManager->remove($user);
+                $entityManager->flush();
+            }
         }
 
-        return $this->redirectToRoute('user_index');
+
+        return $this->redirectToRoute('app_user');
     }
 
 
